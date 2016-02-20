@@ -63,11 +63,11 @@ vars <- matrix(0,0,2)
 while(abs(lik-lik_pre)>eps)
 {
 lik_pre <- lik
-result <- optim(c(beta_a,beta_e), loglik_AtEt_epsp_g, gr_AtEt_epsp_g, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, var_b_a=var_b_a, var_b_e=var_b_e, D_a=D_a, D_e=D_e, lower = rep(-5,n_a+n_e), upper = rep(5,n_a+n_e), method = "L-BFGS-B")
+result <- optim(c(beta_a,beta_e), loglik_AtEt_epsp_g, gr_AtEt_epsp_g, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, var_b_a=var_b_a, var_b_e=var_b_e, D_a=D_a, D_e=D_e, lower = rep(-5,n_a+n_e), upper = rep(5,n_a+n_e), method = "L-BFGS-B", control=list(maxit = 3000))
 betas <- rbind(betas,result$par)
 beta_a <- result$par[1:n_a]
 beta_e <- result$par[(1+n_a):(n_a+n_e)]
-result <- optim(c(var_b_a,var_b_e), loglik_AtEt_epsp, gr_AtEt_epsp, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, beta_a=beta_a, beta_e=beta_e, D_a=D_a, D_e=D_e, lower = c(0.0001, 0.0001), upper = c(100, 100), method = "L-BFGS-B")
+result <- optim(c(var_b_a,var_b_e), loglik_AtEt_epsp, gr_AtEt_epsp, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, beta_a=beta_a, beta_e=beta_e, D_a=D_a, D_e=D_e, lower = c(0.0001, 0.0001), upper = c(100, 100), method = "L-BFGS-B", control=list(maxit = 3000))
 vars <- rbind(vars, result$par)
 var_b_a <- result$par[1]
 var_b_e <- result$par[2]
@@ -78,7 +78,7 @@ liks <- c(liks, result$value)
 
 min_i <- match(min(liks), liks)
 
-result <- optim(betas[min_i,], loglik_AtEt_epsp_g, gr_AtEt_epsp_g, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, var_b_a=vars[min_i,1], var_b_e=vars[min_i,2], D_a=D_a, D_e=D_e, lower = rep(-10,n_e+n_a), upper = rep(10,n_e+n_a), method = "L-BFGS-B")
+result <- optim(betas[min_i,], loglik_AtEt_epsp_g, gr_AtEt_epsp_g, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, var_b_a=vars[min_i,1], var_b_e=vars[min_i,2], D_a=D_a, D_e=D_e, lower = rep(-10,n_e+n_a), upper = rep(10,n_e+n_a), method = "L-BFGS-B", control=list(maxit = 3000))
 
 AtEtp_model <- list(D_a = D_a, D_e = D_e, pheno_m = pheno_m, pheno_d = pheno_d, T_m = T_m, T_d = T_d, knot_a=knots_a, knot_e=knots_e, beta_a=result$par[1:n_a], beta_e=result$par[(1+n_a):(n_e+n_a)], con=result$convergence, lik=result$value, iter=liks, var_b_a=vars[min_i,1], var_b_e=vars[min_i,2])
 

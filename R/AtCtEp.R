@@ -65,11 +65,11 @@ vars <- matrix(0,0,3)
 while(abs(lik-lik_pre)>eps)
 {
 lik_pre <- lik
-result <- optim(c(beta_a,beta_c), loglik_AtCtE_epsp_g, gr_AtCtE_epsp_g, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, var=var, var_b_a=var_b_a, var_b_c=var_b_c, D_a=D_a, D_c=D_c, lower = rep(-Inf,n_a+n_c), upper = rep(10,n_a+n_c), method = "L-BFGS-B")
+result <- optim(c(beta_a,beta_c), loglik_AtCtE_epsp_g, gr_AtCtE_epsp_g, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, var=var, var_b_a=var_b_a, var_b_c=var_b_c, D_a=D_a, D_c=D_c, lower = rep(-Inf,n_a+n_c), upper = rep(10,n_a+n_c), method = "L-BFGS-B", control=list(maxit = 3000))
 betas <- rbind(betas, result$par)
 beta_a <- result$par[1:n_a]
 beta_c <- result$par[(1+n_a):(n_a+n_c)]
-result <- optim(c(var,var_b_a,var_b_c), loglik_AtCtE_epsp, gr_AtCtE_epsp, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, beta_a=beta_a, beta_c=beta_c, D_a=D_a, D_c=D_c, lower = rep(0.00001,3), upper = rep(10,3), method = "L-BFGS-B")
+result <- optim(c(var,var_b_a,var_b_c), loglik_AtCtE_epsp, gr_AtCtE_epsp, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, beta_a=beta_a, beta_c=beta_c, D_a=D_a, D_c=D_c, lower = rep(0.00001,3), upper = rep(10,3), method = "L-BFGS-B", control=list(maxit = 3000))
 vars <- rbind(vars, result$par)
 var <- result$par[1]
 var_b_a <- result$par[2]
@@ -81,7 +81,7 @@ liks <- c(liks, result$value)
 
 min_i <- match(min(liks), liks)
 
-result <- optim(betas[min_i,], loglik_AtCtE_epsp_g, gr_AtCtE_epsp_g, pheno_m = matrix(pheno_m), pheno_d = matrix(pheno_d), B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, var=vars[min_i,1], var_b_a=vars[min_i,2], var_b_c=vars[min_i,3], D_a=D_a, D_c=D_c, lower = rep(-Inf,n_c+n_a), upper = rep(10,n_c+n_a), method = "L-BFGS-B")
+result <- optim(betas[min_i,], loglik_AtCtE_epsp_g, gr_AtCtE_epsp_g, pheno_m = matrix(pheno_m), pheno_d = matrix(pheno_d), B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, var=vars[min_i,1], var_b_a=vars[min_i,2], var_b_c=vars[min_i,3], D_a=D_a, D_c=D_c, lower = rep(-Inf,n_c+n_a), upper = rep(10,n_c+n_a), method = "L-BFGS-B", control=list(maxit = 3000))
 
 AtCtEp_model <- list(D_a = D_a, D_c = D_c, pheno_m = pheno_m, pheno_d = pheno_d, T_m = T_m, T_d = T_d, knot_a=knots_a, knot_c=knots_c, beta_a=result$par[1:n_a], beta_c=result$par[(1+n_a):(n_c+n_a)], con=result$convergence, lik=(result$value)/2, iter=(liks)/2, var=vars[min_i,1], var_b_a=vars[min_i,2], var_b_c=vars[min_i,3])
 

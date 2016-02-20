@@ -2,20 +2,22 @@
 \alias{plot_acet}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Plot variance curves for various ACE(t) or ACE(t)-p models  
+Plot variance curves for various ACE(t) or ACE(t)-p models with 95% CIs 
 }
 \description{
-Plot variance curves of the A, C and E components with respect to age modelled by B-splines or P-splines.
+Plot variance curves (with 95% CIs) of the A, C and E components with respect to age modelled by B-splines or P-splines.
 }
 \usage{
-plot_acet(acet)
+plot_acet(acet, boot = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{acet}{
 An object obtained from the B-splines or P-splines functions. For the P-splines functions, an object from the MCMC method must be used.
 }
-  
+  \item{boot}{
+An indicator of whether the confidence bands estimated from the bootstrap method are plotted. The default is FALSE. Only available for the AtCtEt model.
+}
 }
 
 

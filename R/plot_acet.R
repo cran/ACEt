@@ -1,4 +1,4 @@
-plot_acet <- function(acet)
+plot_acet <- function(acet, boot = FALSE)
 {
 	if(!(class(acet) %in% c('AtCtEt_model', 'AtCtEp_mc_model','AtEtp_mc_model','AtCtEtp_mc_model')))
 	{
@@ -7,7 +7,7 @@ plot_acet <- function(acet)
 
 	if(class(acet)=='AtCtEt_model')
 	{
-		plot_AtCtEt(acet)
+		plot_AtCtEt(acet, boot)
 	}
 	
 	

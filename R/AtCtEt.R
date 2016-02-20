@@ -1,5 +1,5 @@
 AtCtEt <-
-function(data_m, data_d, model = c('d','d','d'), knot_a=5, knot_c=5, knot_e=5)
+function(data_m, data_d, model = c('d','d','d'), knot_a=5, knot_c=5, knot_e=5, boot=FALSE, num_b = 100)
 {
 
 pheno_m <- c(t(data_m[,1:2]))
@@ -107,39 +107,63 @@ init_c <- 0
 init_e <- 0
 
 up_a <- up_c <- up_e <- 5
-lo_a <- lo_c <- lo_e <- -1000
+lo_a <- lo_c <- -Inf
+lo_e <- -20
 
 if(model[1]=='n')
 {
-up_a <- lo_a <- -1000
-init_a <- -1000
+up_a <- lo_a <- 0
+init_a <- 0
+}
+
+if(model[1]=='c')
+{
+up_a <- 1000
+lo_a <- 0
+init_a <- 1
 }
 
 if(model[2]=='n')
 {
-up_c <- lo_c <- -1000
-init_c <- -1000
+up_c <- lo_c <- 0
+init_c <- 0
 }
 
-result <- optim(c(rep(init_a, n_a),rep(init_c, n_c),rep(init_e, n_e)), loglik_AtCtEt_esp, gr_AtCtEt_esp, pheno_m = matrix(pheno_m), pheno_d = matrix(pheno_d), B_des_a_m = B_des_a_m, B_des_a_d = B_des_a_d, B_des_c_m = B_des_c_m, B_des_c_d = B_des_c_d, B_des_e_m = B_des_e_m, B_des_e_d = B_des_e_d,lower = c(rep(lo_a, n_a),rep(lo_c, n_c),rep(lo_e, n_e)), upper = c(rep(up_a, n_a),rep(up_c, n_c),rep(up_e, n_e)), method = "L-BFGS-B", hessian = TRUE)
+if(model[2]=='c')
+{
+up_c <- 1000
+lo_c <- 0
+init_c <- 1
+}
+
+if(model[3]=='c')
+{
+up_e <- 1000
+lo_e <- 0.000001
+init_e <- 1
+}
+
+result <- optim(c(rep(init_a, n_a),rep(init_c, n_c),rep(init_e, n_e)), loglik_AtCtEt_esp, gr_AtCtEt_esp, pheno_m = matrix(pheno_m), pheno_d = matrix(pheno_d), B_des_a_m = B_des_a_m, B_des_a_d = B_des_a_d, B_des_c_m = B_des_c_m, B_des_c_d = B_des_c_d, B_des_e_m = B_des_e_m, B_des_e_d = B_des_e_d,lower = c(rep(lo_a, n_a),rep(lo_c, n_c),rep(lo_e, n_e)), upper = c(rep(up_a, n_a),rep(up_c, n_c),rep(up_e, n_e)), method = "L-BFGS-B", hessian = TRUE, control=list(maxit = 3000))
 
 res_a <- result$par[1:n_a]
 res_c <- result$par[(1+n_a):(n_c+n_a)]
 res_e <- result$par[(1+n_a+n_c):(n_e+n_c+n_a)]
-if(model[1]=='n')
-{
-res_a <- -Inf
-}
 
-if(model[2]=='n')
-{
-res_c <- -Inf
-}
+AtCtEt_model <- list(n_beta_a=n_a, n_beta_c=n_c, n_beta_e=n_e, beta_a=res_a, beta_c=res_c, beta_e=res_e, hessian=result$hessian, con=result$convergence, lik=result$value, knots_a =knots_a, knots_c = knots_c, knots_e = knots_e, min_t = min(T_m, T_d), max_t = max(T_m, T_d), boot = NULL )
 
-AtCtEt_model <- list(n_beta_a=n_a, n_beta_c=n_c, n_beta_e=n_e, beta_a=res_a, beta_c=res_c, beta_e=res_e, hessian=result$hessian, con=result$convergence, lik=result$value, knots_a =knots_a, knots_c = knots_c, knots_e = knots_e, min_t = min(T_m, T_d), max_t = max(T_m, T_d) )
+if(AtCtEt_model$con!=0)
+{
+warning('The optimization algorithm might not converge.')
+}
 
 class(AtCtEt_model) <- 'AtCtEt_model'
 
-return(AtCtEt_model)
+if(boot==TRUE)
+{
+	boot_res <- AtCtEt_boot(res = AtCtEt_model, model, data_m, data_d, knot_a, knot_c, knot_e, B=num_b,alpha=0.05,m=500)
+	AtCtEt_model$boot <- boot_res
+}
+
+return(invisible(AtCtEt_model))
 
 }
