@@ -49,6 +49,18 @@ RcppExport SEXP loglik_AtCtEt_epsp_c(SEXP v_b_a, SEXP v_b_c, SEXP v_b_e, SEXP ph
 	k_1d << 0.5 << 0 << arma::endr << 0 << 0.5 << arma::endr;
 	arma::vec  v = arma::ones<arma::vec>(2);
 	arma::mat diag = arma::diagmat(v);
+	int penal_a = 2;
+	//if(d_a(0,1)==-1)
+	if(num_a==1)
+	{penal_a = 1;}
+	int penal_c = 2;
+	//if(d_c(0,1)==-1)
+	if(num_c==1)
+	{penal_c = 1;}
+	int penal_e = 2;
+	//if(d_e(0,1)==-1)
+	if(num_e==1)
+	{penal_e = 1;}
 	
 	k_m.fill(1);
 	k_2d.fill(0.5);
@@ -220,20 +232,34 @@ RcppExport SEXP loglik_AtCtEt_epsp_c(SEXP v_b_a, SEXP v_b_c, SEXP v_b_e, SEXP ph
 	{
 		temp11.col(i) = gsd_emme(i)*b_e_m_t.col(i);
 	}
-
-	gsd_max.submat(0,0,num_a-1,num_a-1) = arma::diagmat(2*d_a.diag())/va + temp1*b_a_m_h + 0.25*temp2*b_a_d + temp3*b_a_d_h;
+	if(va>0)
+		gsd_max.submat(0,0,num_a-1,num_a-1) = arma::diagmat(2*d_a.diag())/va + temp1*b_a_m_h + 0.25*temp2*b_a_d + temp3*b_a_d_h;
+	else
+		gsd_max.submat(0,0,num_a-1,num_a-1) = temp1*b_a_m_h + 0.25*temp2*b_a_d + temp3*b_a_d_h;
 	gsd_max.submat(num_a,0,num_a+num_c-1,num_a-1) = temp4*b_a_m_h + temp5*b_a_d_h;
 	gsd_max.submat(0,num_a,num_a-1,num_a+num_c-1) = trans(gsd_max.submat(num_a,0,num_a+num_c-1,num_a-1));
-	gsd_max.submat(num_a,num_a,num_a+num_c-1,num_a+num_c-1) = arma::diagmat(2*d_c.diag())/vc + temp6*b_c_m_h + temp7*b_c_d_h;
+	if(vc>0)
+		gsd_max.submat(num_a,num_a,num_a+num_c-1,num_a+num_c-1) = arma::diagmat(2*d_c.diag())/vc + temp6*b_c_m_h + temp7*b_c_d_h;
+	else
+		gsd_max.submat(num_a,num_a,num_a+num_c-1,num_a+num_c-1) = temp6*b_c_m_h + temp7*b_c_d_h;
 	gsd_max.submat(num_a+num_c,0,num_a+num_c+num_e-1,num_a-1) = temp8*b_a_m_h + 0.5*temp9*b_a_d + temp10*b_a_d_h;
 	gsd_max.submat(0,num_a+num_c,num_a-1,num_a+num_c+num_e-1) = trans(gsd_max.submat(num_a+num_c,0,num_a+num_c+num_e-1,num_a-1));
-	gsd_max.submat(num_a+num_c,num_a+num_c,num_a+num_c+num_e-1,num_a+num_c+num_e-1) = arma::diagmat(2*d_e.diag())/ve + temp11*b_e_m + temp12*b_e_d;
+	if(ve>0)
+		gsd_max.submat(num_a+num_c,num_a+num_c,num_a+num_c+num_e-1,num_a+num_c+num_e-1) = arma::diagmat(2*d_e.diag())/ve + temp11*b_e_m + temp12*b_e_d;
+	else
+		gsd_max.submat(num_a+num_c,num_a+num_c,num_a+num_c+num_e-1,num_a+num_c+num_e-1) = temp11*b_e_m + temp12*b_e_d;
 	gsd_max.submat(num_a,num_a+num_c,num_a+num_c-1,num_a+num_c+num_e-1) = temp13*b_e_m_h + temp14*b_e_d_h;
 	gsd_max.submat(num_a+num_c, num_a, num_a+num_c+num_e-1,num_a+num_c-1) = trans(gsd_max.submat(num_a,num_a+num_c,num_a+num_c-1,num_a+num_c+num_e-1));
 
 	double gsd = log(fabs(det(0.5*gsd_max)));
 
-	double res = D_m + YSY_m + D_d + YSY_d + (num_a-2)*log(va) + (num_c-2)*log(vc) + (num_e-2)*log(ve) + as_scalar(trans(ba)*d_a*ba)/va + as_scalar(trans(bc)*d_c*bc)/vc + as_scalar(trans(be)*d_e*be)/ve + gsd;
+	double res = D_m + YSY_m + D_d + YSY_d + gsd;
+	if(va>0)
+		res += (num_a-penal_a)*log(va) + as_scalar(trans(ba)*d_a*ba)/va;
+	if(vc>0)
+		res += (num_c-penal_c)*log(vc) + as_scalar(trans(bc)*d_c*bc)/vc;
+	if(ve>0)
+		res += (num_e-penal_e)*log(ve) + as_scalar(trans(be)*d_e*be)/ve;
 
 	return(Rcpp::wrap(res));
 }
@@ -321,7 +347,13 @@ RcppExport SEXP loglik_AtCtEt_epsp_g_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_
 		D_d = D_d + log(det_d);
 	}
 
-	double res = D_m + YSY_m + D_d + YSY_d + as_scalar(trans(ba)*d_a*ba)/va + as_scalar(trans(bc)*d_c*bc)/vc + as_scalar(trans(be)*d_e*be)/ve;
+	double res = D_m + YSY_m + D_d + YSY_d;
+	if(va>0)
+		res += as_scalar(trans(ba)*d_a*ba)/va;
+	if(vc>0)
+		res += as_scalar(trans(bc)*d_c*bc)/vc;
+	if(ve>0)
+		res += as_scalar(trans(be)*d_e*be)/ve;
 
 	return(Rcpp::wrap(res));
 }
@@ -441,9 +473,15 @@ RcppExport SEXP gr_AtCtEt_epsp_g_c(SEXP b_a, SEXP b_c,  SEXP b_e, SEXP pheno_m, 
 	}
 
 	arma::vec res(num_a+num_c+num_e);
-	arma::vec res_a = v_b_a_m + v_b_a_d + 2*d_a*ba/va;
-	arma::vec res_c = v_b_c_m + v_b_c_d + 2*d_c*bc/vc;
-	arma::vec res_e = v_b_e_m + v_b_e_d + 2*d_e*be/ve;
+	arma::vec res_a = v_b_a_m + v_b_a_d;
+	if(va>0)
+		res_a += 2*d_a*ba/va;
+	arma::vec res_c = v_b_c_m + v_b_c_d;
+	if(vc>0)
+		res_c += 2*d_c*bc/vc;
+	arma::vec res_e = v_b_e_m + v_b_e_d;
+	if(ve>0)
+		res_e += 2*d_e*be/ve;
 	for(int i = 0; i < num_a; i++)
 	{
 		res(i) = res_a(i);
@@ -492,6 +530,18 @@ RcppExport SEXP gr_AtCtEt_epsp_c(SEXP v_b_a, SEXP v_b_c, SEXP v_b_e, SEXP pheno_
 	k_1d << 0.5 << 0 << arma::endr << 0 << 0.5 << arma::endr;
 	arma::vec  v = arma::ones<arma::vec>(2);
 	arma::mat diag = arma::diagmat(v);
+	int penal_a = 2;
+	//if(d_a(0,1)==-1)
+	if(num_a==1)
+	{penal_a = 1;}
+	int penal_c = 2;
+	//if(d_c(0,1)==-1)
+	if(num_c==1)
+	{penal_c = 1;}
+	int penal_e = 2;
+	//if(d_e(0,1)==-1)
+	if(num_e==1)
+	{penal_e = 1;}
 	
 	k_m.fill(1);
 	k_2d.fill(0.5);
@@ -670,14 +720,22 @@ RcppExport SEXP gr_AtCtEt_epsp_c(SEXP v_b_a, SEXP v_b_c, SEXP v_b_e, SEXP pheno_
 	{
 		temp11.col(i) = gsd_emme(i)*b_e_m_t.col(i);
 	}
-
-	gsd_max.submat(0,0,num_a-1,num_a-1) = arma::diagmat(2*d_a.diag())/va + temp1*b_a_m_h + 0.25*temp2*b_a_d + temp3*b_a_d_h;
+	if(va>0)
+		gsd_max.submat(0,0,num_a-1,num_a-1) = arma::diagmat(2*d_a.diag())/va + temp1*b_a_m_h + 0.25*temp2*b_a_d + temp3*b_a_d_h;
+	else
+		gsd_max.submat(0,0,num_a-1,num_a-1) = temp1*b_a_m_h + 0.25*temp2*b_a_d + temp3*b_a_d_h;
 	gsd_max.submat(num_a,0,num_a+num_c-1,num_a-1) = temp4*b_a_m_h + temp5*b_a_d_h;
 	gsd_max.submat(0,num_a,num_a-1,num_a+num_c-1) = trans(gsd_max.submat(num_a,0,num_a+num_c-1,num_a-1));
-	gsd_max.submat(num_a,num_a,num_a+num_c-1,num_a+num_c-1) = arma::diagmat(2*d_c.diag())/vc + temp6*b_c_m_h + temp7*b_c_d_h;
+	if(vc>0)
+		gsd_max.submat(num_a,num_a,num_a+num_c-1,num_a+num_c-1) = arma::diagmat(2*d_c.diag())/vc + temp6*b_c_m_h + temp7*b_c_d_h;
+	else
+		gsd_max.submat(num_a,num_a,num_a+num_c-1,num_a+num_c-1) = temp6*b_c_m_h + temp7*b_c_d_h;
 	gsd_max.submat(num_a+num_c,0,num_a+num_c+num_e-1,num_a-1) = temp8*b_a_m_h + 0.5*temp9*b_a_d + temp10*b_a_d_h;
 	gsd_max.submat(0,num_a+num_c,num_a-1,num_a+num_c+num_e-1) = trans(gsd_max.submat(num_a+num_c,0,num_a+num_c+num_e-1,num_a-1));
-	gsd_max.submat(num_a+num_c,num_a+num_c,num_a+num_c+num_e-1,num_a+num_c+num_e-1) = arma::diagmat(2*d_e.diag())/ve + temp11*b_e_m + temp12*b_e_d;
+	if(ve>0)
+		gsd_max.submat(num_a+num_c,num_a+num_c,num_a+num_c+num_e-1,num_a+num_c+num_e-1) = arma::diagmat(2*d_e.diag())/ve + temp11*b_e_m + temp12*b_e_d;
+	else
+		gsd_max.submat(num_a+num_c,num_a+num_c,num_a+num_c+num_e-1,num_a+num_c+num_e-1) = temp11*b_e_m + temp12*b_e_d;
 	gsd_max.submat(num_a,num_a+num_c,num_a+num_c-1,num_a+num_c+num_e-1) = temp13*b_e_m_h + temp14*b_e_d_h;
 	gsd_max.submat(num_a+num_c, num_a, num_a+num_c+num_e-1,num_a+num_c-1) = trans(gsd_max.submat(num_a,num_a+num_c,num_a+num_c-1,num_a+num_c+num_e-1));
 
@@ -688,11 +746,17 @@ RcppExport SEXP gr_AtCtEt_epsp_c(SEXP v_b_a, SEXP v_b_c, SEXP v_b_e, SEXP pheno_
 	gsd_b_e.submat(num_a+num_c,num_a+num_c,num_a+num_c+num_e-1,num_a+num_c+num_e-1) = arma::diagmat(2*d_e.diag());
 	
 	arma::mat temp_m = inv_gsd_max*gsd_b_a;
-	double d_v_b_a = ((-1)*as_scalar(trans(ba)*d_a*ba)-0.5*arma::sum(temp_m.diag()))/(va*va) + (num_a-2)/va;
+	double d_v_b_a = 0;
+	if(va>0)
+		d_v_b_a = ((-1)*as_scalar(trans(ba)*d_a*ba)-0.5*arma::sum(temp_m.diag()))/(va*va) + (num_a-penal_a)/va;
 	temp_m = inv_gsd_max*gsd_b_c;
-	double d_v_b_c = ((-1)*as_scalar(trans(bc)*d_c*bc)-0.5*arma::sum(temp_m.diag()))/(vc*vc) + (num_c-2)/vc;
+	double d_v_b_c = 0;
+	if(vc>0)
+		d_v_b_c = ((-1)*as_scalar(trans(bc)*d_c*bc)-0.5*arma::sum(temp_m.diag()))/(vc*vc) + (num_c-penal_c)/vc;
 	temp_m = inv_gsd_max*gsd_b_e;
-	double d_v_b_e = ((-1)*as_scalar(trans(be)*d_e*be)-0.5*arma::sum(temp_m.diag()))/(ve*ve) + (num_e-2)/ve;
+	double d_v_b_e = 0;
+	if(ve>0)
+		d_v_b_e = ((-1)*as_scalar(trans(be)*d_e*be)-0.5*arma::sum(temp_m.diag()))/(ve*ve) + (num_e-penal_e)/ve;
 
 	arma::vec res(3);
 	res(0) = d_v_b_a;

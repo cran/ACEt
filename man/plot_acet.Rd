@@ -5,10 +5,10 @@
 Plot variance curves for various ACE(t) or ACE(t)-p models with 95% CIs 
 }
 \description{
-Plot variance curves (with 95% CIs) of the A, C and E components with respect to age modelled by B-splines or P-splines.
+Plot variance curves or a heritability curve (with 95% CIs) of the A, C and E components with respect to age modelled by B-splines or P-splines.
 }
 \usage{
-plot_acet(acet, boot = FALSE)
+plot_acet(acet, boot = FALSE, heri = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,7 +16,10 @@ plot_acet(acet, boot = FALSE)
 An object obtained from the B-splines or P-splines functions. For the P-splines functions, an object from the MCMC method must be used.
 }
   \item{boot}{
-An indicator of whether the confidence bands estimated from the bootstrap method are plotted. The default is FALSE. Only available for the AtCtEt model.
+An logical  indicator of whether the confidence bands estimated from the bootstrap method are plotted. The default is FALSE. Only available for the AtCtEt model.
+}
+  \item{heri}{
+A logical indicator of whether to plot the dynamic heritability curve (currently only available for the B-splines). The default is FALSE.
 }
 }
 
@@ -33,13 +36,14 @@ Liang He
 \examples{
 
 # data(data_ace)
-# result <- AtCtEp(data_ace$mz, data_ace$dz, knot_a = 5, knot_c = 4)
+# result <- AtCtEtp(data_ace$mz, data_ace$dz, knot_a = 5, knot_c = 4)
 # result_mc <- acetp_mcmc(result, iter_num=10000, burnin = 500)
 # plot_acet(result_mc)
 
-# result <- AtCtEt(data_ace$mz, data_ace$dz, model=c('d','c','c'), knot_a = 5)
+# result <- AtCtEt(data_ace$mz, data_ace$dz, mod=c('d','c','c'), knot_a = 5)
 # plot_acet(result)
 }
+
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ ~kwd1 }

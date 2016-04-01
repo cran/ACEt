@@ -1,4 +1,4 @@
-plot_acet <- function(acet, boot = FALSE)
+plot_acet <- function(acet, boot = FALSE, heri = FALSE)
 {
 	if(!(class(acet) %in% c('AtCtEt_model', 'AtCtEp_mc_model','AtEtp_mc_model','AtCtEtp_mc_model')))
 	{
@@ -7,23 +7,28 @@ plot_acet <- function(acet, boot = FALSE)
 
 	if(class(acet)=='AtCtEt_model')
 	{
-		plot_AtCtEt(acet, boot)
+		if(heri == FALSE)
+		{
+			plot_AtCtEt(acet, boot)
+		}else{
+			plot_AtCtEt_h(acet, boot)
+		}
 	}
 	
 	
-	if(class(acet)=='AtCtEp_mc_model')
-	{
-		plot_AtCtEp(acet)
-	}
+	#if(class(acet)=='AtCtEp_mc_model')
+	#{
+	#	plot_AtCtEp(acet)
+	#}
 
 	if(class(acet)=='AtCtEtp_mc_model')
 	{
 		plot_AtCtEtp(acet)
 	}
 
-	if(class(acet)=='AtEtp_mc_model')
-	{
-		plot_AtEtp(acet)
-	}
+	#if(class(acet)=='AtEtp_mc_model')
+	#{
+	#	plot_AtEtp(acet)
+	#}
 
 }

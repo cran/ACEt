@@ -12,6 +12,22 @@ B_a_d <- t(B_des_a_d)
 B_c_m <- t(B_des_c_m)
 B_c_d <- t(B_des_c_d)
 
+if(var_b_a <= 0.05)
+{
+ei_a <- eigen(D_a)
+G_a <- t(ei_a$vectors)
+}else{
+G_a <- diag(rep(1,num_a))
+}
+
+if(var_b_c <= 0.05)
+{
+ei_c <- eigen(D_c)
+G_c <- t(ei_c$vectors)
+}else{
+G_c <- diag(rep(1,num_c))
+}
+
 multResult <- rep(0,num_a+num_c+(num_a+1)*num_a/2+(num_c+1)*num_c/2+1)
 
 output =.C("CWrapper_mcmc",
@@ -26,6 +42,8 @@ B_des_a_m = as.double(B_a_m),
 B_des_a_d = as.double(B_a_d),
 B_des_c_m = as.double(B_c_m),
 B_des_c_d = as.double(B_c_d),
+G_a = as.double(G_a),
+G_c = as.double(G_c),
 var = as.double(var),
 var_b_a = as.double(var_b_a),
 var_b_c = as.double(var_b_c),
@@ -81,6 +99,28 @@ B_a_d <- t(B_des_a_d)
 B_e_m <- t(B_des_e_m)
 B_e_d <- t(B_des_e_d)
 
+if(var_b_a <= 0.05)
+{
+ei_a <- eigen(D_a)
+#G_a <- diag(sqrt(c(ei_a$value[1:(num_a-2)],0,0)))%*%ei_a$vectors
+#G_a[num_a-1,] <- rep(1,num_a)
+#G_a[num_a,] <- 1:num_a
+G_a <- t(ei_a$vectors)
+}else{
+G_a <- diag(rep(1,num_a))
+}
+
+if(var_b_e <= 0.05)
+{
+ei_e <- eigen(D_e)
+#G_e <- diag(sqrt(c(ei_e$value[1:(num_e-2)],0,0)))%*%ei_e$vectors
+#G_e[num_e-1,] <- rep(1,num_e)
+#G_e[num_e,] <- 1:num_e
+G_e <- t(ei_e$vectors)
+}else{
+G_e <- diag(rep(1,num_e))
+}
+
 multResult <- rep(0,num_a+num_e+(num_a+1)*num_a/2+(num_e+1)*num_e/2+1)
 var <- -1
 
@@ -96,6 +136,8 @@ B_des_a_m = as.double(B_a_m),
 B_des_a_d = as.double(B_a_d),
 B_des_c_m = as.double(B_e_m),
 B_des_c_d = as.double(B_e_d),
+G_a = as.double(G_a),
+G_c = as.double(G_e),
 var = as.double(var),
 var_b_a = as.double(var_b_a),
 var_b_c = as.double(var_b_e),
@@ -152,6 +194,30 @@ B_c_d <- t(B_des_c_d)
 B_e_m <- t(B_des_e_m)
 B_e_d <- t(B_des_e_d)
 
+if(var_b_a <= 0.05)
+{
+ei_a <- eigen(D_a)
+G_a <- t(ei_a$vectors)
+}else{
+G_a <- diag(rep(1,num_a))
+}
+
+if(var_b_c <= 0.05)
+{
+ei_c <- eigen(D_c)
+G_c <- t(ei_c$vectors)
+}else{
+G_c <- diag(rep(1,num_c))
+}
+
+if(var_b_e <= 0.05)
+{
+ei_e <- eigen(D_e)
+G_e <- t(ei_e$vectors)
+}else{
+G_e <- diag(rep(1,num_e))
+}
+
 multResult <- rep(0,num_a+num_c+num_e+(num_a+1)*num_a/2+(num_c+1)*num_c/2+(num_e+1)*num_e/2+1)
 
 output =.C("CWrapper_mcmc_atctet",
@@ -169,6 +235,9 @@ B_des_c_m = as.double(B_c_m),
 B_des_c_d = as.double(B_c_d),
 B_des_e_m = as.double(B_e_m),
 B_des_e_d = as.double(B_e_d),
+G_a = as.double(G_a),
+G_c = as.double(G_c),
+G_e = as.double(G_e),
 var_b_a = as.double(var_b_a),
 var_b_c = as.double(var_b_c),
 var_b_e = as.double(var_b_e),

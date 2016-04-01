@@ -11,14 +11,57 @@ plot_AtCtEtp <- function(AtCtEtp_mcmc)
 	#pheno_d <- c(t(data_d[,1:2]))
 	#T_m <- rep(data_m[,3], each=2)
 	#T_d <- rep(data_d[,3], each=2)
+	p_n <- 500
 
 	order <- 3
-	x <- seq(from=model_cur$min_t, to=model_cur$max_t, length.out=500)
-	bb_c <- splineDesign(model_cur$knots_c, x = x, ord=order, outer.ok = TRUE)
-	points_c <- exp(bb_c%*%model_cur$beta_c_mc)
-	bb_a <- splineDesign(model_cur$knots_a, x = x, ord=order, outer.ok = TRUE)
+	x <- seq(from=model_cur$min_t, to=model_cur$max_t, length.out=p_n)
+	t_int <- model_cur$max_t-model_cur$min_t
+	l_m_1 <- (model_cur$max_t-x)/t_int
+	l_m_2 <- (x-model_cur$min_t)/t_int
+
+	if(length(model_cur$beta_a_mc)>2)
+	{
+		bb_a <- splineDesign(model_cur$knots_a, x = x, ord=order, outer.ok = TRUE)
+	}else{
+		if(length(model_cur$beta_a_mc)==2)
+		{
+			bb_a <- matrix(NA, p_n, 2)
+			bb_a[,1] <- l_m_1
+			bb_a[,2] <- l_m_2
+		}else{
+			bb_a <- matrix(1, p_n, 1)
+		}
+	}
 	points_a <- exp(bb_a%*%model_cur$beta_a_mc)
-	bb_e <- splineDesign(model_cur$knots_e, x = x, ord=order, outer.ok = TRUE)
+
+	if(length(model_cur$beta_c_mc)>2)
+	{
+		bb_c <- splineDesign(model_cur$knots_c, x = x, ord=order, outer.ok = TRUE)
+	}else{
+		if(length(model_cur$beta_c_mc)==2)
+		{
+			bb_c <- matrix(NA, p_n, 2)
+			bb_c[,1] <- l_m_1
+			bb_c[,2] <- l_m_2
+		}else{
+			bb_c <- matrix(1, p_n, 1)
+		}
+	}
+	points_c <- exp(bb_c%*%model_cur$beta_c_mc)
+
+	if(length(model_cur$beta_e_mc)>2)
+	{
+		bb_e <- splineDesign(model_cur$knots_e, x = x, ord=order, outer.ok = TRUE)
+	}else{
+		if(length(model_cur$beta_e_mc)==2)
+		{
+			bb_e <- matrix(NA, p_n, 2)
+			bb_e[,1] <- l_m_1
+			bb_e[,2] <- l_m_2
+		}else{
+			bb_e <- matrix(1, p_n, 1)
+		}
+	}
 	points_e <- exp(bb_e%*%model_cur$beta_e_mc)
 
 	plot(range(x), c(0,max(points_c, points_a, points_e)+1), type = "n", xlab = "Age", ylab = "Variance",main =  "Variance curves of the A, C and E components")

@@ -46,22 +46,10 @@ plot_AtCtEt <- function(AtCtEt, boot=FALSE)
 	l_a <- model_cur$n_beta_a
 	l_c <- model_cur$n_beta_c
 	l_e <- model_cur$n_beta_e
-	points_a <- bb_a%*%model_cur$beta_a
-	if(l_a>1)
-	{
-		points_a <- exp(points_a)	
-	}
-	points_c <- bb_c%*%model_cur$beta_c
-	if(l_c>1)
-	{
-		points_c <- exp(points_c)	
-	}
-	points_e <- bb_e%*%model_cur$beta_e
-	if(l_e>1)
-	{
-		points_e <- exp(points_e)	
-	}
-	
+	points_a <- exp(bb_a%*%model_cur$beta_a)
+	points_c <- exp(bb_c%*%model_cur$beta_c)
+	points_e <- exp(bb_e%*%model_cur$beta_e)
+
 	#fisher <- solve(model_cur$hessian[2:(1+l_a+l_c),2:(1+l_a+l_c)])
 	fisher <- solve(model_cur$hessian)
 	
@@ -107,11 +95,11 @@ plot_AtCtEt <- function(AtCtEt, boot=FALSE)
 		upper[i] <- sum(bb_a[i,]*model_cur$beta_a) + 1.96*sd[i]
 		}else{flag <- 1}
 	}
-	if(l_a>1)
-	{
+	#if(l_a>1)
+	#{
 		lower <- exp(lower)
 		upper <- exp(upper)
-	}
+	#}
 	lower <- ifelse(lower<0, 0, lower)
 	upper <- ifelse(upper>max_v, max_v, upper)
 	if(flag == 0)
@@ -143,11 +131,11 @@ plot_AtCtEt <- function(AtCtEt, boot=FALSE)
 		upper[i] <- sum(bb_c[i,]*model_cur$beta_c) + 1.96*sd[i]
 		}else{flag <- 1}
 	}
-	if(l_c>1)
-	{
+	#if(l_c>1)
+	#{
 		lower <- exp(lower)
 		upper <- exp(upper)
-	}
+	#}
 	lower <- ifelse(lower<0, 0, lower)
 	upper <- ifelse(upper>max_v, max_v, upper)
 	if(flag == 0)
@@ -172,11 +160,11 @@ plot_AtCtEt <- function(AtCtEt, boot=FALSE)
 		lower[i] <- sum(bb_e[i,]*model_cur$beta_e) - 1.96*sd[i]
 		upper[i] <- sum(bb_e[i,]*model_cur$beta_e) + 1.96*sd[i]
 	}
-	if(l_e>1)
-	{
+	#if(l_e>1)
+	#{
 		lower <- exp(lower)
 		upper <- exp(upper)
-	}
+	#}
 	lower <- ifelse(lower<0, 0, lower)
 	upper <- ifelse(upper>max_v, max_v, upper)
 	lines(x, lower, col = "yellow" ,lty = 2 , lwd = 0.6)

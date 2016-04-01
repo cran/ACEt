@@ -8,7 +8,7 @@ The ACE(t)-p model
 The ACE(t)-p model with the A, C and E variance components as functions with respect to age modelled by P-splines.
 }
 \usage{
-AtCtEtp(data_m, data_d, knot_a = 8, knot_c = 8, knot_e = 8, eps = 0.1)
+AtCtEtp(data_m, data_d, knot_a = 8, knot_c = 8, knot_e = 8, eps = 0.1, mod=c('d','d','d'))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,6 +32,10 @@ The number of interior knots of the B-spline for the E component. The default va
   \item{eps}{
 Tolerance for convergence of the EM algorithm iterations. The default value is 0.1.
 }
+
+  \item{mod}{
+A character vector of length 3. Each element specifies the function for the A, C or E component respectively. The components can be 'd'(dynamic), 'c'(constant) or 'l'(linear). The default is c('d','d','d').
+}
 }
 
 \value{
@@ -39,9 +43,9 @@ Tolerance for convergence of the EM algorithm iterations. The default value is 0
   \item{var_b_a }{The estimated variance for the penalized coefficient for the A components.}
   \item{var_b_c }{The estimated variance for the penalized coefficient for the C components.}
   \item{var_b_e }{The estimated variance for the penalized coefficient for the E components.}
-  \item{beta_a }{The estimated spline coefficients of the A component.}
-  \item{beta_c }{The estimated spline coefficients of the C component.}
-  \item{beta_e }{The estimated spline coefficients of the E component.}
+  \item{beta_a }{The estimated spline coefficients of the A component. See 'details' for more information.}
+  \item{beta_c }{The estimated spline coefficients of the C component. See 'details' for more information.}
+  \item{beta_e }{The estimated spline coefficients of the E component. See 'details' for more information.}
   \item{con }{An indicator of convergence of the optimization algorithm. An integer code 0 indicates successful completion. See 'optim' for more details.}
   \item{lik }{The minus log marginal likelihood.}
   \item{knot_a }{A vector of the knot positions for the A component.}
@@ -49,9 +53,17 @@ Tolerance for convergence of the EM algorithm iterations. The default value is 0
   \item{knot_e }{A vector of the knot positions for the E component.}
 %% ...
 }
+
+\details{
+When the 'mod' parameter for a component is 'd'(dynamic), the corresponding 'beta' is the spline coefficients.   
+When the 'mod' parameter for a component is 'l'(linear), the corresponding 'beta' is a vector of two values, the exponential of which (exp(beta)) are the variances at the minimum and maximum age (or other covariates) provided in the data.     
+When the 'mod' parameter for a component is 'c'(constant), the corresponding 'beta' has only one value and exp(beta) is the variance.
+}
+
 \references{
 He, L., Sillanp‰‰, M. J., Silventoinen, K., Kaprio, J., & Pitk‰niemi, J. (2016). Estimating Modifying Effect of Age on Genetic and Environmental Variance Components in Twin Models. Genetics, genetics-115.
 }
+
 \author{
 Liang He
 }
@@ -62,7 +74,7 @@ Liang He
 \examples{
 # data(data_ace)
 
-# result <- AtCtEtp(data_ace$mz, data_ace$dz, knot_e = 7, knot_a = 5, knot_c = 5)
+# result <- AtCtEtp(data_ace$mz, data_ace$dz, knot_e = 7, knot_c = 5, mod=c('d','d','d'))
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

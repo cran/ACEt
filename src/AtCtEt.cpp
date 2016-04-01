@@ -61,17 +61,17 @@ RcppExport SEXP loglik_AtCtEt_esp_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_m, 
 		double temp_com_a = exp(as_scalar(b_a_m.row(start)*ba));
 		if(num_a==1)
 		{
-			temp_com_a = ba(0);
+			temp_com_a = exp(ba(0));
 		}
 		double temp_com_c = exp(as_scalar(b_c_m.row(start)*bc));
 		if(num_c==1)
 		{
-			temp_com_c = bc(0);
+			temp_com_c = exp(bc(0));
 		}
 		double temp_com_e = exp(as_scalar(b_e_m.row(start)*be));
 		if(num_e==1)
 		{
-			temp_com_e = be(0);
+			temp_com_e = exp(be(0));
 		}
 		V_m = temp_com_e*diag+temp_com_c*k_m+temp_com_a*k_m;
 		double det_m = V_m(0,0)*V_m(0,0)-V_m(0,1)*V_m(0,1);
@@ -95,17 +95,17 @@ RcppExport SEXP loglik_AtCtEt_esp_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_m, 
 		double temp_com_a = exp(as_scalar(b_a_d.row(start)*ba));
 		if(num_a==1)
 		{
-			temp_com_a = ba(0);
+			temp_com_a = exp(ba(0));
 		}
 		double temp_com_c = exp(as_scalar(b_c_d.row(start)*bc));
 		if(num_c==1)
 		{
-			temp_com_c = bc(0);
+			temp_com_c = exp(bc(0));
 		}
 		double temp_com_e = exp(as_scalar(b_e_d.row(start)*be));
 		if(num_e==1)
 		{
-			temp_com_e = be(0);
+			temp_com_e = exp(be(0));
 		}
 		arma::mat V_d = temp_com_e*diag+temp_com_c*k_d+temp_com_a*k_d_a;
 		//arma::mat inv_V_d = inv(V_d);
@@ -173,17 +173,17 @@ RcppExport SEXP gr_AtCtEt_esp_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_m, SEXP
 		double temp_com_a = exp(as_scalar(b_a_m.row(start)*ba));
 		if(num_a==1)
 		{
-			temp_com_a = ba(0);
+			temp_com_a = exp(ba(0));
 		}
 		double temp_com_c = exp(as_scalar(b_c_m.row(start)*bc));
 		if(num_c==1)
 		{
-			temp_com_c = bc(0);
+			temp_com_c = exp(bc(0));
 		}
 		double temp_com_e = exp(as_scalar(b_e_m.row(start)*be));
 		if(num_e==1)
 		{
-			temp_com_e = be(0);
+			temp_com_e = exp(be(0));
 		}
 		V_m = temp_com_e*diag+temp_com_c*k_m+temp_com_a*k_m;
 		inv_V_m = inv(V_m);
@@ -197,28 +197,28 @@ RcppExport SEXP gr_AtCtEt_esp_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_m, SEXP
 		arma::mat temp_prod = inv_V_m*k_m;
 		//double temp_c = exp(as_scalar(b_c_m.row(start)*bc))*(arma::sum(temp_prod.diag())-as_scalar(ph_inv_m*k_m*inv_ph_m));
 		double temp_c = arma::sum(temp_prod.diag())-as_scalar(ph_inv_m*k_m*inv_ph_m);
-		if(num_c>1)
-		{
+		//if(num_c>1)
+		//{
 			temp_c = temp_com_c*temp_c;
-		}
+		//}
 		for(int j = 0; j < num_c; j++)
 		{
 			var_bc_m(j) = var_bc_m(j) + b_c_m(start,j)*temp_c;
 		}
 		double temp_a = arma::sum(temp_prod.diag())-as_scalar(ph_inv_m*k_m*inv_ph_m);
-		if(num_a>1)
-		{
+		//if(num_a>1)
+		//{
 			temp_a = temp_com_a*temp_a;
-		}
+		//}
 		for(int j = 0; j < num_a; j++)
 		{
 			var_ba_m(j) = var_ba_m(j) + b_a_m(start,j)*temp_a;
 		}
 		double temp_e = arma::sum(inv_V_m.diag())-as_scalar(ph_inv_m*inv_ph_m);
-		if(num_e>1)
-		{
+		//if(num_e>1)
+		//{
 			temp_e = temp_com_e*temp_e;
-		}
+		//}
 		for(int j = 0; j < num_e; j++)
 		{
 			var_be_m(j) = var_be_m(j) + b_e_m(start,j)*temp_e;
@@ -237,17 +237,17 @@ RcppExport SEXP gr_AtCtEt_esp_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_m, SEXP
 		double temp_com_a = exp(as_scalar(b_a_d.row(start)*ba));
 		if(num_a==1)
 		{
-			temp_com_a = ba(0);
+			temp_com_a = exp(ba(0));
 		}
 		double temp_com_c = exp(as_scalar(b_c_d.row(start)*bc));
 		if(num_c==1)
 		{
-			temp_com_c = bc(0);
+			temp_com_c = exp(bc(0));
 		}
 		double temp_com_e = exp(as_scalar(b_e_d.row(start)*be));
 		if(num_e==1)
 		{
-			temp_com_e = be(0);
+			temp_com_e = exp(be(0));
 		}
 		arma::mat V_d = temp_com_e*diag+temp_com_c*k_d+temp_com_a*k_d_a;
 		arma::mat inv_V_d = inv(V_d);
@@ -261,29 +261,29 @@ RcppExport SEXP gr_AtCtEt_esp_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_m, SEXP
 		arma::mat temp_prod = inv_V_d*k_d;
 		//double temp_c = exp(as_scalar(b_c_d.row(start)*bc))*(arma::sum(temp_prod.diag())-as_scalar(ph_inv_d*k_d*inv_ph_d));
 		double temp_c = arma::sum(temp_prod.diag())-as_scalar(ph_inv_d*k_d*inv_ph_d);
-		if(num_c>1)
-		{
+		//if(num_c>1)
+		//{
 			temp_c = temp_com_c*temp_c;
-		}
+		//}
 		for(int j = 0; j < num_c; j++)
 		{
 			var_bc_d(j) = var_bc_d(j) + b_c_d(start,j)*temp_c;
 		}
 		temp_prod = inv_V_d*k_d_a;
 		double temp_a = arma::sum(temp_prod.diag())-as_scalar(ph_inv_d*k_d_a*inv_ph_d);
-		if(num_a>1)
-		{
+		//if(num_a>1)
+		//{
 			temp_a = temp_com_a*temp_a;
-		}
+		//}
 		for(int j = 0; j < num_a; j++)
 		{
 			var_ba_d(j) = var_ba_d(j) + b_a_d(start,j)*temp_a;
 		}
 		double temp_e = temp_com_e*(arma::sum(inv_V_d.diag())-as_scalar(ph_inv_d*inv_ph_d));
-		if(num_e>1)
-		{
+		//if(num_e>1)
+		//{
 			temp_e = temp_com_e*temp_e;
-		}
+		//}
 		for(int j = 0; j < num_e; j++)
 		{
 			var_be_d(j) = var_be_d(j) + b_e_d(start,j)*temp_e;

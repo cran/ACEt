@@ -68,14 +68,72 @@ if(class(AtCtEtp)!='AtCtEtp_model')
 	stop('The first parameter must be an object obtained from the AtCtEtp function.')
 }
 
-order <- 3
+T_m <- AtCtEtp$T_m
+num_m <- length(T_m)
+T_d <- AtCtEtp$T_d
+num_d <- length(T_d)
 
-B_des_a_m <- splineDesign(AtCtEtp$knot_a, x=AtCtEtp$T_m, ord=order)
-B_des_a_d <- splineDesign(AtCtEtp$knot_a, x=AtCtEtp$T_d, ord=order)
-B_des_c_m <- splineDesign(AtCtEtp$knot_c, x=AtCtEtp$T_m, ord=order)
-B_des_c_d <- splineDesign(AtCtEtp$knot_c, x=AtCtEtp$T_d, ord=order)
-B_des_e_m <- splineDesign(AtCtEtp$knot_e, x=AtCtEtp$T_m, ord=order)
-B_des_e_d <- splineDesign(AtCtEtp$knot_e, x=AtCtEtp$T_d, ord=order)
+t_int <- max(c(T_m,T_d))-min(c(T_m,T_d))
+l_m_1 <- (max(c(T_m,T_d))-T_m)/t_int
+l_m_2 <- (T_m-min(c(T_m,T_d)))/t_int
+l_d_1 <- (max(c(T_m,T_d))-T_d)/t_int
+l_d_2 <- (T_d-min(c(T_m,T_d)))/t_int
+
+order <- 3
+if(length(AtCtEtp$beta_a)>2)
+{
+	B_des_a_m <- splineDesign(AtCtEtp$knot_a, x=AtCtEtp$T_m, ord=order)
+	B_des_a_d <- splineDesign(AtCtEtp$knot_a, x=AtCtEtp$T_d, ord=order)
+}else{
+	if(length(AtCtEtp$beta_a)==2)
+	{
+		B_des_a_m <- matrix(NA, num_m, 2)
+		B_des_a_m[,1] <- l_m_1
+		B_des_a_m[,2] <- l_m_2
+		B_des_a_d <- matrix(NA, num_d, 2)
+		B_des_a_d[,1] <- l_d_1
+		B_des_a_d[,2] <- l_d_2
+	}else{
+		B_des_a_m <- matrix(1, num_m, 1)
+		B_des_a_d <- matrix(1, num_d, 1)
+	}
+}
+if(length(AtCtEtp$beta_c)>2)
+{
+	B_des_c_m <- splineDesign(AtCtEtp$knot_c, x=AtCtEtp$T_m, ord=order)
+	B_des_c_d <- splineDesign(AtCtEtp$knot_c, x=AtCtEtp$T_d, ord=order)
+}else{
+	if(length(AtCtEtp$beta_c)==2)
+	{
+		B_des_c_m <- matrix(NA, num_m, 2)
+		B_des_c_m[,1] <- l_m_1
+		B_des_c_m[,2] <- l_m_2
+		B_des_c_d <- matrix(NA, num_d, 2)
+		B_des_c_d[,1] <- l_d_1
+		B_des_c_d[,2] <- l_d_2
+	}else{
+		B_des_c_m <- matrix(1, num_m, 1)
+		B_des_c_d <- matrix(1, num_d, 1)
+	}
+}
+if(length(AtCtEtp$beta_e)>2)
+{
+	B_des_e_m <- splineDesign(AtCtEtp$knot_e, x=AtCtEtp$T_m, ord=order)
+	B_des_e_d <- splineDesign(AtCtEtp$knot_e, x=AtCtEtp$T_d, ord=order)
+}else{
+	if(length(AtCtEtp$beta_e)==2)
+	{
+		B_des_e_m <- matrix(NA, num_m, 2)
+		B_des_e_m[,1] <- l_m_1
+		B_des_e_m[,2] <- l_m_2
+		B_des_e_d <- matrix(NA, num_d, 2)
+		B_des_e_d[,1] <- l_d_1
+		B_des_e_d[,2] <- l_d_2
+	}else{
+		B_des_e_m <- matrix(1, num_m, 1)
+		B_des_e_d <- matrix(1, num_d, 1)
+	}
+}
 
 result <- mcmc_epsp_AtCtEt(AtCtEtp$pheno_m, AtCtEtp$pheno_d, B_des_a_m, B_des_a_d, B_des_c_m, B_des_c_d, B_des_e_m, B_des_e_d, AtCtEtp$var_b_a, AtCtEtp$var_b_c, AtCtEtp$var_b_e, AtCtEtp$D_a, AtCtEtp$D_c, AtCtEtp$D_e, iter_num, burnin, sd)
 

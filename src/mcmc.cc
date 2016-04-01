@@ -2,8 +2,10 @@
 
 
 typedef boost::minstd_rand base_generator_type;
-
-void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int * num_col_c, double *ph_m, double *ph_d, double *B_des_a_m, double *B_des_a_d, double *B_des_c_m, double *B_des_c_d, double *var, double *var_b_a, double *var_b_c, int *D_a, int *D_c, int *iter_n, int *burn, double *sd_mcmc)
+/*
+void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int * num_col_c, double *ph_m, double *ph_d, 
+	double *B_des_a_m, double *B_des_a_d, double *B_des_c_m, double *B_des_c_d, double *G_a, double *G_c,
+	double *var, double *var_b_a, double *var_b_c, int *D_a, int *D_c, int *iter_n, int *burn, double *sd_mcmc)
 {
 
 	int ITER_NUM = (*iter_n);
@@ -38,6 +40,8 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 	Mat b_a_d;
 	Mat b_c_m;
 	Mat b_c_d;
+	Mat g_a;
+	Mat g_c;
 	double VAR = (*var);
 	double VAR_A = (*var_b_a);
 	double VAR_C = (*var_b_c);
@@ -106,6 +110,30 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 		b_c_d.push_back(row_ge);
 	}
 
+	p2 = G_a;
+	for(int i = 0; i < COL_A; i++)
+	{
+		Vec row_ge;
+		for(int j = 0; j < COL_A; j++)
+		{
+			double temp = *p2++;
+			row_ge.push_back(temp);
+		}
+		g_a.push_back(row_ge);
+	}
+
+	p2 = G_c;
+	for(int i = 0; i < COL_C; i++)
+	{
+		Vec row_ge;
+		for(int j = 0; j < COL_C; j++)
+		{
+			double temp = *p2++;
+			row_ge.push_back(temp);
+		}
+		g_c.push_back(row_ge);
+	}
+
 	int *p3 = D_a;
 	for(int i = 0; i < COL_A; i++)
 	{
@@ -130,16 +158,31 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 		D_C.push_back(row_ge);
 	}
 
+	int penal_a = 2;
+	if(D_A[0][1]==-1)
+	{penal_a = 1;}
+	int penal_c = 2;
+	if(D_C[0][1]==-1)
+	{penal_c = 1;}
+	
 	Vec a_t(COL_A);
 	Vec c_t(COL_C);
+	Vec tr_a_t(COL_A);
+	Vec tr_c_t(COL_C);
 	Mat mcmc_a;
 	Mat mcmc_c;
 	for(int i = 0; i < COL_A; i++)
+	{
 		a_t[i] = 0;
+		tr_a_t[i] = 0;
+	}
 	for(int i = 0; i < COL_C; i++)
+	{
 		c_t[i] = 0;
-	mcmc_a.push_back(a_t);
-	mcmc_c.push_back(c_t);
+		tr_c_t[i] = 0;
+	}
+	mcmc_a.push_back(tr_a_t);
+	mcmc_c.push_back(tr_c_t);
 	double lik = 0;
 
 	double YSY_m = 0;
@@ -178,7 +221,7 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_m += pheno_m[i]*pheno_m[i]*i_a11 + pheno_m[i]*pheno_m[i+1]*i_a12*2 + pheno_m[i+1]*pheno_m[i+1]*i_a22;
 			D_m += log(a11*a11-a12*a12);		
 			
@@ -215,7 +258,7 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_d += pheno_d[i]*pheno_d[i]*i_a11 + pheno_d[i]*pheno_d[i+1]*i_a12*2 + pheno_d[i+1]*pheno_d[i+1]*i_a22;
 			D_d += log(a11*a11-a12*a12);
 			i += 2;
@@ -238,23 +281,86 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 		temp_d_c /= VAR_C;
 
 		lik = YSY_m + YSY_d + D_m + D_d + temp_d_a + temp_d_c;
-
+	
 	for(int iter = 1; iter < ITER_NUM; iter++)
 	{
 		Vec a_n(COL_A);
-		for(int i = 0; i < COL_A; i++)
+		double step = VAR_A;
+		if(step>0.05)
+		{step = (*sd_mcmc);}
+		
+		if(penal_a==2)
 		{
-		gen_type2 die_gen_a(generator, distribution_type2(a_t[i],(*sd_mcmc)));
-		boost::generator_iterator<gen_type2> die_a(&die_gen_a);
-		a_n[i] = *die_a++;
+			for(int i = 0; i < (COL_A-penal_a); i++)
+			{	
+				gen_type2 die_gen_a(generator, distribution_type2(a_t[i],step));
+				boost::generator_iterator<gen_type2> die_a(&die_gen_a);
+				a_n[i] = *die_a++;
+			}
+		}
+		else
+		{
+			for(int i = 0; i < (COL_A-penal_a); i++)
+			{	
+				a_n[i] = 0;
+			}
+		}
+		for(int i = (COL_A-penal_a); i < COL_A; i++)
+		{
+			gen_type2 die_gen_a(generator, distribution_type2(a_t[i],(*sd_mcmc)));
+			boost::generator_iterator<gen_type2> die_a(&die_gen_a);
+			a_n[i] = *die_a++;
 		}
 
+		
+		Vec tr_a(COL_A);
+		for(int i = 0; i < COL_A; i++)
+		{
+			double prod_a_t = 0;
+			for(int j = 0; j < COL_A; j++)
+			{
+				prod_a_t += g_a[i][j]*a_n[j];
+			}
+			tr_a[i] = prod_a_t;
+		}
+		
+		step = VAR_C;
+		if(step>0.05)
+		{step = (*sd_mcmc);}
+
 		Vec c_n(COL_C);
+		if(penal_c==2)
+		{
+			for(int i = 0; i < (COL_C-penal_c); i++)
+			{
+				gen_type2 die_gen_c(generator, distribution_type2(c_t[i],step));
+				boost::generator_iterator<gen_type2> die_c(&die_gen_c);
+				c_n[i] = *die_c++;
+			}
+		}
+		else
+		{
+			for(int i = 0; i < (COL_C-penal_c); i++)
+			{	
+				c_n[i] = 0;
+			}
+		}
+		for(int i = (COL_C-penal_c); i < COL_C; i++)
+		{
+			gen_type2 die_gen_c(generator, distribution_type2(c_t[i],(*sd_mcmc)));
+			boost::generator_iterator<gen_type2> die_c(&die_gen_c);
+			c_n[i] = *die_c++;
+		}
+
+		Vec tr_c(COL_C);
 		for(int i = 0; i < COL_C; i++)
 		{
-		gen_type2 die_gen_c(generator, distribution_type2(c_t[i],(*sd_mcmc)));
-		boost::generator_iterator<gen_type2> die_c(&die_gen_c);
-		c_n[i] = *die_c++;
+			double prod_c_t = 0;
+			for(int j = 0; j < COL_C; j++)
+			{
+				prod_c_t += g_c[i][j]*c_n[j];
+			}
+			tr_c[i] = prod_c_t;
 		}
 		
 		double new_lik = 0;
@@ -262,19 +368,19 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 		YSY_d = 0;
 		D_m = 0;
 		D_d = 0;
-
+		
 		for(int i = 0; i < NUM_SUB_M; )
 		{
 			double temp_a = 0;
 			for(int j = 0; j < COL_A; j++)
 			{
-				temp_a += a_n[j]*b_a_m[i][j];
+				temp_a += tr_a[j]*b_a_m[i][j];
 			}
 			temp_a = exp(temp_a);
 			double temp_c = 0;
 			for(int j = 0; j < COL_C; j++)
 			{
-				temp_c += c_n[j]*b_c_m[i][j];
+				temp_c += tr_c[j]*b_c_m[i][j];
 			}
 			temp_c = exp(temp_c);
 
@@ -294,7 +400,7 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_m += pheno_m[i]*pheno_m[i]*i_a11 + pheno_m[i]*pheno_m[i+1]*i_a12*2 + pheno_m[i+1]*pheno_m[i+1]*i_a22;
 			D_m += log(a11*a11-a12*a12);
 			i += 2;
@@ -305,13 +411,13 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 			double temp_a = 0;
 			for(int j = 0; j < COL_A; j++)
 			{
-				temp_a += a_n[j]*b_a_d[i][j];
+				temp_a += tr_a[j]*b_a_d[i][j];
 			}
 			temp_a = exp(temp_a);
 			double temp_c = 0;
 			for(int j = 0; j < COL_C; j++)
 			{
-				temp_c += c_n[j]*b_c_d[i][j];
+				temp_c += tr_c[j]*b_c_d[i][j];
 			}
 			temp_c = exp(temp_c);
 
@@ -330,7 +436,7 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_d += pheno_d[i]*pheno_d[i]*i_a11 + pheno_d[i]*pheno_d[i+1]*i_a12*2 + pheno_d[i+1]*pheno_d[i+1]*i_a22;
 			D_d += log(a11*a11-a12*a12);
 			i += 2;
@@ -340,7 +446,7 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 		for(int i = 0; i < COL_A; i++)
 			for(int j = 0; j < COL_A; j++)
 			{
-				temp_d_a += a_n[i]*D_A[i][j]*a_n[j];
+				temp_d_a += tr_a[i]*D_A[i][j]*tr_a[j];
 			}
 		temp_d_a /= VAR_A;
 
@@ -348,7 +454,7 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 		for(int i = 0; i < COL_C; i++)
 			for(int j = 0; j < COL_C; j++)
 			{
-				temp_d_c += c_n[i]*D_C[i][j]*c_n[j];
+				temp_d_c += tr_c[i]*D_C[i][j]*tr_c[j];
 			}
 		temp_d_c /= VAR_C;
 
@@ -362,10 +468,12 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 		{
 			a_t = a_n;
 			c_t = c_n;
+			tr_a_t = tr_a;
+			tr_c_t = tr_c;
 			lik = new_lik;
 		}
-		mcmc_a.push_back(a_t);
-		mcmc_c.push_back(c_t);
+		mcmc_a.push_back(tr_a_t);
+		mcmc_c.push_back(tr_c_t);
 		// std::cout<<iter;
 	}
 	
@@ -437,12 +545,14 @@ void ci_mh(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int *
 	}
 	
 }
+*/
+
 
 void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz, 
 				  int * num_col_a, int * num_col_c, int * num_col_e, 
 				  double *ph_m, double *ph_d, 
 				  double *B_des_a_m, double *B_des_a_d, double *B_des_c_m, double *B_des_c_d, double *B_des_e_m, double *B_des_e_d, 
-				  double *var_b_a, double *var_b_c, double *var_b_e, 
+				  double *G_a, double *G_c, double *G_e, double *var_b_a, double *var_b_c, double *var_b_e, 
 				  int *D_a, int *D_c, int *D_e, 
 				  int *iter_n, int *burn, double *sd_mcmc)
 {
@@ -482,6 +592,9 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 	Mat b_c_d;
 	Mat b_e_m;
 	Mat b_e_d;
+	Mat g_a;
+	Mat g_c;
+	Mat g_e;
 	double VAR_E = (*var_b_e);
 	double VAR_A = (*var_b_a);
 	double VAR_C = (*var_b_c);
@@ -575,6 +688,42 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 		b_e_d.push_back(row_ge);
 	}
 
+	p2 = G_a;
+	for(int i = 0; i < COL_A; i++)
+	{
+		Vec row_ge;
+		for(int j = 0; j < COL_A; j++)
+		{
+			double temp = *p2++;
+			row_ge.push_back(temp);
+		}
+		g_a.push_back(row_ge);
+	}
+
+	p2 = G_c;
+	for(int i = 0; i < COL_C; i++)
+	{
+		Vec row_ge;
+		for(int j = 0; j < COL_C; j++)
+		{
+			double temp = *p2++;
+			row_ge.push_back(temp);
+		}
+		g_c.push_back(row_ge);
+	}
+
+	p2 = G_e;
+	for(int i = 0; i < COL_E; i++)
+	{
+		Vec row_ge;
+		for(int j = 0; j < COL_E; j++)
+		{
+			double temp = *p2++;
+			row_ge.push_back(temp);
+		}
+		g_e.push_back(row_ge);
+	}
+
 	int *p3 = D_a;
 	for(int i = 0; i < COL_A; i++)
 	{
@@ -611,18 +760,40 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 		D_E.push_back(row_ge);
 	}
 
+	int penal_a = 2;
+	if(D_A[0][1]==-1)
+	{penal_a = 1;}
+	int penal_c = 2;
+	if(D_C[0][1]==-1)
+	{penal_c = 1;}
+	int penal_e = 2;
+	if(D_E[0][1]==-1)
+	{penal_e = 1;}
+
 	Vec a_t(COL_A);
 	Vec c_t(COL_C);
 	Vec e_t(COL_E);
+	Vec tr_a_t(COL_A);
+	Vec tr_c_t(COL_C);
+	Vec tr_e_t(COL_E);
 	Mat mcmc_a;
 	Mat mcmc_c;
 	Mat mcmc_e;
 	for(int i = 0; i < COL_A; i++)
+	{
 		a_t[i] = 0;
+		tr_a_t[i] = 0;
+	}
 	for(int i = 0; i < COL_C; i++)
+	{
 		c_t[i] = 0;
+		tr_c_t[i] = 0;
+	}
 	for(int i = 0; i < COL_E; i++)
+	{
 		e_t[i] = 0;
+		tr_e_t[i] = 0;
+	}
 	mcmc_a.push_back(a_t);
 	mcmc_c.push_back(c_t);
 	mcmc_e.push_back(e_t);
@@ -664,7 +835,7 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_m += pheno_m[i]*pheno_m[i]*i_a11 + pheno_m[i]*pheno_m[i+1]*i_a12*2 + pheno_m[i+1]*pheno_m[i+1]*i_a22;
 			D_m += log(a11*a11-a12*a12);		
 			
@@ -703,62 +874,236 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_d += pheno_d[i]*pheno_d[i]*i_a11 + pheno_d[i]*pheno_d[i+1]*i_a12*2 + pheno_d[i+1]*pheno_d[i+1]*i_a22;
 			D_d += log(a11*a11-a12*a12);
 			i += 2;
 		}
-
+		
 		double temp_d_a = 0;
+		/*
 		for(int i = 0; i < COL_A; i++)
 			for(int j = 0; j < COL_A; j++)
 			{
 				temp_d_a += a_t[i]*D_A[i][j]*a_t[j];
 			}
 		temp_d_a /= VAR_A;
-
+		*/
 		double temp_d_c = 0;
+		/*
 		for(int i = 0; i < COL_C; i++)
 			for(int j = 0; j < COL_C; j++)
 			{
 				temp_d_c += c_t[i]*D_C[i][j]*c_t[j];
 			}
 		temp_d_c /= VAR_C;
+		*/
 
 		double temp_d_e = 0;
+		/*
 		for(int i = 0; i < COL_E; i++)
 			for(int j = 0; j < COL_E; j++)
 			{
 				temp_d_e += e_t[i]*D_E[i][j]*e_t[j];
 			}
 		temp_d_e /= VAR_E;
+		*/
 
 		lik = YSY_m + YSY_d + D_m + D_d + temp_d_a + temp_d_c + temp_d_e;
+		Vec map_a(COL_A);
+		Vec map_c(COL_C);
+		Vec map_e(COL_E);
 
 	for(int iter = 1; iter < ITER_NUM; iter++)
 	{
+		double step = 0;
 		Vec a_n(COL_A);
-		for(int i = 0; i < COL_A; i++)
+		Vec tr_a(COL_A);
+		if(COL_A>2)
 		{
-		gen_type2 die_gen_a(generator, distribution_type2(a_t[i],(*sd_mcmc)));
-		boost::generator_iterator<gen_type2> die_a(&die_gen_a);
-		a_n[i] = *die_a++;
+			step = VAR_A;
+			if(step>0.05)
+			{step = (*sd_mcmc);}
+		
+			if((penal_a==2)&&(VAR_A>0))
+			{
+				for(int i = 0; i < (COL_A-penal_a); i++)
+				{
+					gen_type2 die_gen_a(generator, distribution_type2(a_t[i],step));
+					boost::generator_iterator<gen_type2> die_a(&die_gen_a);
+					a_n[i] = *die_a++;
+				}
+			}
+			else
+			{
+				for(int i = 0; i < (COL_A-penal_a); i++)
+				{	
+					a_n[i] = 0;
+				}
+			}
+
+			for(int i = (COL_A-penal_a); i < COL_A; i++)
+			{
+				gen_type2 die_gen_a(generator, distribution_type2(a_t[i],(*sd_mcmc)));
+				boost::generator_iterator<gen_type2> die_a(&die_gen_a);
+				a_n[i] = *die_a++;
+			}
+
+			for(int i = 0; i < COL_A; i++)
+			{
+				double prod_a_t = 0;
+				for(int j = 0; j < COL_A; j++)
+				{
+					prod_a_t += g_a[i][j]*a_n[j];
+				}
+				tr_a[i] = prod_a_t;
+			}
+		}
+		else
+		{
+			if(COL_A==2)
+			{
+				for(int i = 0; i < 2; i++)
+				{
+					gen_type2 die_gen_a(generator, distribution_type2(a_t[i],(*sd_mcmc)));
+					boost::generator_iterator<gen_type2> die_a(&die_gen_a);
+					a_n[i] = *die_a++;
+					tr_a[i] = a_n[i];
+				}
+			}
+			else
+			{
+				gen_type2 die_gen_a(generator, distribution_type2(a_t[0],(*sd_mcmc)));
+				boost::generator_iterator<gen_type2> die_a(&die_gen_a);
+				a_n[0] = *die_a++;
+				tr_a[0] = a_n[0];
+			}
 		}
 
 		Vec c_n(COL_C);
-		for(int i = 0; i < COL_C; i++)
+		Vec tr_c(COL_C);
+		if(COL_C>2)
 		{
-		gen_type2 die_gen_c(generator, distribution_type2(c_t[i],(*sd_mcmc)));
-		boost::generator_iterator<gen_type2> die_c(&die_gen_c);
-		c_n[i] = *die_c++;
+			step = VAR_C;
+			if(step>0.05)
+			{step = (*sd_mcmc);}
+
+			if((penal_c==2)&&(VAR_C>0))
+			{
+				for(int i = 0; i < (COL_C-penal_c); i++)
+				{
+					gen_type2 die_gen_c(generator, distribution_type2(c_t[i],step));
+					boost::generator_iterator<gen_type2> die_c(&die_gen_c);
+					c_n[i] = *die_c++;
+				}
+			}
+			else
+			{
+				for(int i = 0; i < (COL_C-penal_c); i++)
+				{	
+					c_n[i] = 0;
+				}
+			}
+			for(int i = (COL_C-penal_c); i < COL_C; i++)
+			{
+				gen_type2 die_gen_c(generator, distribution_type2(c_t[i],(*sd_mcmc)));
+				boost::generator_iterator<gen_type2> die_c(&die_gen_c);
+				c_n[i] = *die_c++;
+			}
+
+			for(int i = 0; i < COL_C; i++)
+			{
+				double prod_c_t = 0;
+				for(int j = 0; j < COL_C; j++)
+				{
+					prod_c_t += g_c[i][j]*c_n[j];
+				}
+				tr_c[i] = prod_c_t;
+			}
+		}
+		else
+		{
+			if(COL_C==2)
+			{
+				for(int i = 0; i < 2; i++)
+				{
+					gen_type2 die_gen_c(generator, distribution_type2(c_t[i],(*sd_mcmc)));
+					boost::generator_iterator<gen_type2> die_c(&die_gen_c);
+					c_n[i] = *die_c++;
+					tr_c[i] = c_n[i];
+				}
+			}
+			else
+			{
+				gen_type2 die_gen_c(generator, distribution_type2(c_t[0],(*sd_mcmc)));
+				boost::generator_iterator<gen_type2> die_c(&die_gen_c);
+				c_n[0] = *die_c++;
+				tr_c[0] = c_n[0];
+			}
 		}
 
 		Vec e_n(COL_E);
-		for(int i = 0; i < COL_E; i++)
+		Vec tr_e(COL_E);
+		
+		if(COL_E>2)
 		{
-		gen_type2 die_gen_e(generator, distribution_type2(e_t[i],(*sd_mcmc)));
-		boost::generator_iterator<gen_type2> die_e(&die_gen_e);
-		e_n[i] = *die_e++;
+			step = VAR_E;
+			if(step>0.05)
+			{step = (*sd_mcmc);}
+
+		
+			if((penal_e==2)&&(VAR_E>0))
+			{
+				for(int i = 0; i < (COL_E-penal_e); i++)
+				{
+					gen_type2 die_gen_e(generator, distribution_type2(e_t[i],step));
+					boost::generator_iterator<gen_type2> die_e(&die_gen_e);
+					e_n[i] = *die_e++;
+				}
+			}
+			else
+			{
+				for(int i = 0; i < (COL_E-penal_e); i++)
+				{	
+					e_n[i] = 0;
+				}
+			}
+			for(int i = (COL_E-penal_e); i < COL_E; i++)
+			{
+				gen_type2 die_gen_e(generator, distribution_type2(e_t[i],(*sd_mcmc)));
+				boost::generator_iterator<gen_type2> die_e(&die_gen_e);
+				e_n[i] = *die_e++;
+			}
+
+			for(int i = 0; i < COL_E; i++)
+			{
+				double prod_e_t = 0;
+				for(int j = 0; j < COL_E; j++)
+				{
+					prod_e_t += g_e[i][j]*e_n[j];
+				}
+				tr_e[i] = prod_e_t;
+			}
+		}
+		else
+		{
+			if(COL_E==2)
+			{
+				for(int i = 0; i < 2; i++)
+				{
+					gen_type2 die_gen_e(generator, distribution_type2(e_t[i],(*sd_mcmc)));
+					boost::generator_iterator<gen_type2> die_e(&die_gen_e);
+					e_n[i] = *die_e++;
+					tr_e[i] = e_n[i];
+				}
+			}
+			else
+			{
+				gen_type2 die_gen_e(generator, distribution_type2(e_t[0],(*sd_mcmc)));
+				boost::generator_iterator<gen_type2> die_e(&die_gen_e);
+				e_n[0] = *die_e++;
+				tr_e[0] = e_n[0];
+			}
 		}
 		
 		double new_lik = 0;
@@ -772,19 +1117,19 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			double temp_a = 0;
 			for(int j = 0; j < COL_A; j++)
 			{
-				temp_a += a_n[j]*b_a_m[i][j];
+				temp_a += tr_a[j]*b_a_m[i][j];
 			}
 			temp_a = exp(temp_a);
 			double temp_c = 0;
 			for(int j = 0; j < COL_C; j++)
 			{
-				temp_c += c_n[j]*b_c_m[i][j];
+				temp_c += tr_c[j]*b_c_m[i][j];
 			}
 			temp_c = exp(temp_c);
 			double temp_e = 0;
 			for(int j = 0; j < COL_E; j++)
 			{
-				temp_e += e_n[j]*b_e_m[i][j];
+				temp_e += tr_e[j]*b_e_m[i][j];
 			}
 			temp_e = exp(temp_e);
 
@@ -798,7 +1143,7 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_m += pheno_m[i]*pheno_m[i]*i_a11 + pheno_m[i]*pheno_m[i+1]*i_a12*2 + pheno_m[i+1]*pheno_m[i+1]*i_a22;
 			D_m += log(a11*a11-a12*a12);
 			i += 2;
@@ -809,19 +1154,19 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			double temp_a = 0;
 			for(int j = 0; j < COL_A; j++)
 			{
-				temp_a += a_n[j]*b_a_d[i][j];
+				temp_a += tr_a[j]*b_a_d[i][j];
 			}
 			temp_a = exp(temp_a);
 			double temp_c = 0;
 			for(int j = 0; j < COL_C; j++)
 			{
-				temp_c += c_n[j]*b_c_d[i][j];
+				temp_c += tr_c[j]*b_c_d[i][j];
 			}
 			temp_c = exp(temp_c);
 			double temp_e = 0;
 			for(int j = 0; j < COL_E; j++)
 			{
-				temp_e += e_n[j]*b_e_d[i][j];
+				temp_e += tr_e[j]*b_e_d[i][j];
 			}
 			temp_e = exp(temp_e);
 
@@ -835,35 +1180,44 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_d += pheno_d[i]*pheno_d[i]*i_a11 + pheno_d[i]*pheno_d[i+1]*i_a12*2 + pheno_d[i+1]*pheno_d[i+1]*i_a22;
 			D_d += log(a11*a11-a12*a12);
 			i += 2;
 		}
 
 		temp_d_a = 0;
-		for(int i = 0; i < COL_A; i++)
-			for(int j = 0; j < COL_A; j++)
-			{
-				temp_d_a += a_n[i]*D_A[i][j]*a_n[j];
-			}
-		temp_d_a /= VAR_A;
+		if((COL_A>2)&&(VAR_A>0))
+		{
+			for(int i = 0; i < COL_A; i++)
+				for(int j = 0; j < COL_A; j++)
+				{
+					temp_d_a += tr_a[i]*D_A[i][j]*tr_a[j];
+				}
+			temp_d_a /= VAR_A;
+		}
 
 		temp_d_c = 0;
-		for(int i = 0; i < COL_C; i++)
-			for(int j = 0; j < COL_C; j++)
-			{
-				temp_d_c += c_n[i]*D_C[i][j]*c_n[j];
-			}
-		temp_d_c /= VAR_C;
+		if((COL_C>2)&&(VAR_C>0))
+		{
+			for(int i = 0; i < COL_C; i++)
+				for(int j = 0; j < COL_C; j++)
+				{
+					temp_d_c += tr_c[i]*D_C[i][j]*tr_c[j];
+				}
+			temp_d_c /= VAR_C;
+		}
 
 		temp_d_e = 0;
-		for(int i = 0; i < COL_E; i++)
-			for(int j = 0; j < COL_E; j++)
-			{
-				temp_d_e += e_n[i]*D_E[i][j]*e_n[j];
-			}
-		temp_d_e /= VAR_E;
+		if((COL_E>2)&&(VAR_E>0))
+		{
+			for(int i = 0; i < COL_E; i++)
+				for(int j = 0; j < COL_E; j++)
+				{
+					temp_d_e += tr_e[i]*D_E[i][j]*tr_e[j];
+				}
+			temp_d_e /= VAR_E;
+		}
 
 		new_lik = YSY_m + YSY_d + D_m + D_d + temp_d_a + temp_d_c + temp_d_e;
 
@@ -871,16 +1225,25 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 		boost::generator_iterator<gen_type4> die_u1(&die_gen_u1);
 		double u = *die_u1++;
 		double r = exp((-0.5)*(new_lik-lik));
+		if(new_lik<lik)
+		{
+			map_a = tr_a;
+			map_c = tr_c;
+			map_e = tr_e;
+		}
 		if(u<r)
 		{
 			a_t = a_n;
 			c_t = c_n;
 			e_t = e_n;
+			tr_a_t = tr_a;
+			tr_c_t = tr_c;
+			tr_e_t = tr_e;
 			lik = new_lik;
 		}
-		mcmc_a.push_back(a_t);
-		mcmc_c.push_back(c_t);
-		mcmc_e.push_back(e_t);
+		mcmc_a.push_back(tr_a_t);
+		mcmc_c.push_back(tr_c_t);
+		mcmc_e.push_back(tr_e_t);
 		// std::cout<<iter;
 	}
 	
@@ -913,19 +1276,40 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 	for(int i = 0; i < COL_A; i++)
 	{
 		post_mean_a[i] /= iter_count;
-		result[i] = post_mean_a[i];
+		if((penal_a==2)&&(VAR_A>0))
+		{
+			result[i] = post_mean_a[i];
+		}
+		else
+		{
+			result[i] = map_a[i];
+		}
 	}
 	
 	for(int i = 0; i < COL_C; i++)
 	{
 		post_mean_c[i] /= iter_count;
-		result[i+COL_A] = post_mean_c[i];
+		if((penal_c==2)&&(VAR_C>0))
+		{
+			result[i+COL_A] = post_mean_c[i];
+		}
+		else
+		{
+			result[i+COL_A] = map_c[i];
+		}
 	}
 
 	for(int i = 0; i < COL_E; i++)
 	{
 		post_mean_e[i] /= iter_count;
-		result[i+COL_A+COL_C] = post_mean_e[i];
+		if((penal_e==2)&&(VAR_E>0))
+		{
+			result[i+COL_A+COL_C] = post_mean_e[i];
+		}
+		else
+		{
+			result[i+COL_A+COL_C] = map_e[i];
+		}
 	}
 	
 	int cov_i = 0;
@@ -984,8 +1368,10 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 	
 }
 
-
-void ci_mh_atet(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int * num_col_e, double *ph_m, double *ph_d, double *B_des_a_m, double *B_des_a_d, double *B_des_e_m, double *B_des_e_d, double *var_b_a, double *var_b_e, int *D_a, int *D_e, int *iter_n, int *burn, double *sd_mcmc)
+/*
+void ci_mh_atet(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, int * num_col_e, double *ph_m, double *ph_d, 
+	double *B_des_a_m, double *B_des_a_d, double *B_des_e_m, double *B_des_e_d, double * G_a, double * G_e,
+	double *var_b_a, double *var_b_e, int *D_a, int *D_e, int *iter_n, int *burn, double *sd_mcmc)
 {
 
 	int ITER_NUM = (*iter_n);
@@ -1151,7 +1537,7 @@ void ci_mh_atet(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, 
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_m += pheno_m[i]*pheno_m[i]*i_a11 + pheno_m[i]*pheno_m[i+1]*i_a12*2 + pheno_m[i+1]*pheno_m[i+1]*i_a22;
 			D_m += log(a11*a11-a12*a12);
 			i += 2;
@@ -1179,7 +1565,7 @@ void ci_mh_atet(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, 
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_d += pheno_d[i]*pheno_d[i]*i_a11 + pheno_d[i]*pheno_d[i+1]*i_a12*2 + pheno_d[i+1]*pheno_d[i+1]*i_a22;
 			D_d += log(a11*a11-a12*a12);
 			i += 2;
@@ -1249,7 +1635,7 @@ void ci_mh_atet(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, 
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_m += pheno_m[i]*pheno_m[i]*i_a11 + pheno_m[i]*pheno_m[i+1]*i_a12*2 + pheno_m[i+1]*pheno_m[i+1]*i_a22;
 			D_m += log(a11*a11-a12*a12);
 			i += 2;
@@ -1277,7 +1663,7 @@ void ci_mh_atet(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, 
 			double i_a11 = a22/denom;
 			double i_a22 = i_a11;
 			double i_a12 = (-1)*a12/denom;
-			double i_a21 = i_a12;
+			//double i_a21 = i_a12;
 			YSY_d += pheno_d[i]*pheno_d[i]*i_a11 + pheno_d[i]*pheno_d[i+1]*i_a12*2 + pheno_d[i+1]*pheno_d[i+1]*i_a22;
 			D_d += log(a11*a11-a12*a12);
 			i += 2;
@@ -1384,3 +1770,4 @@ void ci_mh_atet(double *result,int * num_p_mz, int * num_p_dz, int * num_col_a, 
 	}
 	
 }
+*/
