@@ -761,13 +761,13 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 	}
 
 	int penal_a = 2;
-	if(D_A[0][1]==-1)
+	if(COL_A==1)
 	{penal_a = 1;}
 	int penal_c = 2;
-	if(D_C[0][1]==-1)
+	if(COL_C==1)
 	{penal_c = 1;}
 	int penal_e = 2;
-	if(D_E[0][1]==-1)
+	if(COL_E==1)
 	{penal_e = 1;}
 
 	Vec a_t(COL_A);
@@ -776,9 +776,11 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 	Vec tr_a_t(COL_A);
 	Vec tr_c_t(COL_C);
 	Vec tr_e_t(COL_E);
-	Mat mcmc_a;
-	Mat mcmc_c;
-	Mat mcmc_e;
+	//Mat mcmc_a;
+	//Mat mcmc_c;
+	//Mat mcmc_e;
+	Vec tr_t_t(COL_A+COL_C+COL_E,0);
+	Mat mcmc_t;
 	for(int i = 0; i < COL_A; i++)
 	{
 		a_t[i] = 0;
@@ -794,9 +796,10 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 		e_t[i] = 0;
 		tr_e_t[i] = 0;
 	}
-	mcmc_a.push_back(a_t);
-	mcmc_c.push_back(c_t);
-	mcmc_e.push_back(e_t);
+	//mcmc_a.push_back(a_t);
+	//mcmc_c.push_back(c_t);
+	//mcmc_e.push_back(e_t);
+	mcmc_t.push_back(tr_t_t);
 	double lik = 0;
 
 	double YSY_m = 0;
@@ -1241,9 +1244,13 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			tr_e_t = tr_e;
 			lik = new_lik;
 		}
-		mcmc_a.push_back(tr_a_t);
-		mcmc_c.push_back(tr_c_t);
-		mcmc_e.push_back(tr_e_t);
+		//mcmc_a.push_back(tr_a_t);
+		//mcmc_c.push_back(tr_c_t);
+		//mcmc_e.push_back(tr_e_t);
+		tr_t_t = tr_a_t;
+		tr_t_t.insert(tr_t_t.end(),tr_c_t.begin(),tr_c_t.end());
+		tr_t_t.insert(tr_t_t.end(),tr_e_t.begin(),tr_e_t.end());
+		mcmc_t.push_back(tr_t_t);
 		// std::cout<<iter;
 	}
 	
@@ -1261,66 +1268,72 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 	{
 		for(int j = 0; j < COL_A; j++)
 		{
-			post_mean_a[j] += mcmc_a[i][j];
+			//post_mean_a[j] += mcmc_a[i][j];
+			post_mean_a[j] += mcmc_t[i][j];
 		}
 		for(int j = 0; j < COL_C; j++)
 		{
-			post_mean_c[j] += mcmc_c[i][j];
+			//post_mean_c[j] += mcmc_c[i][j];
+			post_mean_c[j] += mcmc_t[i][j+COL_A];
 		}
 		for(int j = 0; j < COL_E; j++)
 		{
-			post_mean_e[j] += mcmc_e[i][j];
+			//post_mean_e[j] += mcmc_e[i][j];
+			post_mean_e[j] += mcmc_t[i][j+COL_A+COL_C];
 		}
 	}
 	int iter_count = ITER_NUM - burnin;
 	for(int i = 0; i < COL_A; i++)
 	{
 		post_mean_a[i] /= iter_count;
-		if((penal_a==2)&&(VAR_A>0))
-		{
+		//if((penal_a==2)&&(VAR_A>0))
+		//{
 			result[i] = post_mean_a[i];
-		}
+		/*}
 		else
 		{
 			result[i] = map_a[i];
-		}
+		}*/
 	}
 	
 	for(int i = 0; i < COL_C; i++)
 	{
 		post_mean_c[i] /= iter_count;
-		if((penal_c==2)&&(VAR_C>0))
-		{
+		//if((penal_c==2)&&(VAR_C>0))
+		//{
 			result[i+COL_A] = post_mean_c[i];
-		}
+		/*}
 		else
 		{
 			result[i+COL_A] = map_c[i];
-		}
+		}*/
 	}
 
 	for(int i = 0; i < COL_E; i++)
 	{
 		post_mean_e[i] /= iter_count;
-		if((penal_e==2)&&(VAR_E>0))
-		{
+		//if((penal_e==2)&&(VAR_E>0))
+		//{
 			result[i+COL_A+COL_C] = post_mean_e[i];
-		}
+		/*}
 		else
 		{
 			result[i+COL_A+COL_C] = map_e[i];
-		}
+		}*/
 	}
 	
+	int COL_T = COL_A + COL_C + COL_E;
+	
 	int cov_i = 0;
-	for(int i = 0; i < COL_A; i++)
+	for(int i = 0; i < COL_T; i++)
 	{
-		for(int j = i; j < COL_A; j++)
+		for(int j = i; j < COL_T; j++)
 		{
 			double temp_cov = 0;
 			for(int k = burnin; k < ITER_NUM; k++)
 			{
-				temp_cov += (mcmc_a[k][i] - post_mean_a[i])*(mcmc_a[k][j] - post_mean_a[j]);
+				// temp_cov += (mcmc_a[k][i] - post_mean_a[i])*(mcmc_a[k][j] - post_mean_a[j]);
+				temp_cov += (mcmc_t[k][i] - result[i])*(mcmc_t[k][j] - result[j]);
 			}
 			temp_cov /= iter_count;
 			//post_cov_a[i][j] = temp_cov;
@@ -1329,7 +1342,7 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			cov_i++;
 		}
 	}
-	
+	/*
 	int cov_j = 0;
 	for(int i = 0; i < COL_C; i++)
 	{
@@ -1365,7 +1378,7 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			cov_k++;
 		}
 	}
-	
+	*/
 }
 
 /*

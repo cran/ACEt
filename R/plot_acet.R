@@ -23,7 +23,12 @@ plot_acet <- function(acet, boot = FALSE, heri = FALSE)
 
 	if(class(acet)=='AtCtEtp_mc_model')
 	{
-		plot_AtCtEtp(acet)
+		if(heri==FALSE)
+		{
+	    plot_AtCtEtp(acet)
+		}else{
+		  plot_AtCtEt_h(acet, boot)
+		}
 	}
 
 	#if(class(acet)=='AtEtp_mc_model')

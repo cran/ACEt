@@ -194,7 +194,7 @@ B_c_d <- t(B_des_c_d)
 B_e_m <- t(B_des_e_m)
 B_e_d <- t(B_des_e_d)
 
-if(var_b_a <= 0.05)
+if((var_b_a <= 0.05)&(num_a>2))
 {
 ei_a <- eigen(D_a)
 G_a <- t(ei_a$vectors)
@@ -202,7 +202,7 @@ G_a <- t(ei_a$vectors)
 G_a <- diag(rep(1,num_a))
 }
 
-if(var_b_c <= 0.05)
+if((var_b_c <= 0.05)&(num_c>2))
 {
 ei_c <- eigen(D_c)
 G_c <- t(ei_c$vectors)
@@ -210,7 +210,7 @@ G_c <- t(ei_c$vectors)
 G_c <- diag(rep(1,num_c))
 }
 
-if(var_b_e <= 0.05)
+if((var_b_e <= 0.05)&(num_e>2))
 {
 ei_e <- eigen(D_e)
 G_e <- t(ei_e$vectors)
@@ -218,7 +218,9 @@ G_e <- t(ei_e$vectors)
 G_e <- diag(rep(1,num_e))
 }
 
-multResult <- rep(0,num_a+num_c+num_e+(num_a+1)*num_a/2+(num_c+1)*num_c/2+(num_e+1)*num_e/2+1)
+num_t <- num_a+num_c+num_e
+# multResult <- rep(0,num_a+num_c+num_e+(num_a+1)*num_a/2+(num_c+1)*num_c/2+(num_e+1)*num_e/2+1)
+multResult <- rep(0,num_t+(num_t+1)*num_t/2+1)
 
 output =.C("CWrapper_mcmc_atctet",
 product = as.double(multResult),
@@ -254,40 +256,18 @@ beta_c_mc <- output$product[(1+num_a):(num_a+num_c)]
 beta_e_mc <- output$product[(1+num_a+num_c):(num_a+num_c+num_e)]
 
 k <- 1
-cov_a <- matrix(0, num_a, num_a)
-for(i in 1:num_a)
+cov_t <- matrix(0, num_t, num_t)
+for(i in 1:num_t)
 {
-for(j in i:num_a)
+for(j in i:num_t)
 {
-cov_a[i,j] <- output$product[num_a+num_c+num_e+k]
-cov_a[j,i] <- cov_a[i,j]
-k <- k + 1
-}
-}
-cov_c <- matrix(0, num_c, num_c)
-for(i in 1:num_c)
-{
-for(j in i:num_c)
-{
-cov_c[i,j] <- output$product[num_a+num_c+num_e+k]
-cov_c[j,i] <- cov_c[i,j]
+cov_t[i,j] <- output$product[num_t+k]
+cov_t[j,i] <- cov_t[i,j]
 k <- k + 1
 }
 }
 
-cov_e <- matrix(0, num_e, num_e)
-for(i in 1:num_e)
-{
-for(j in i:num_e)
-{
-cov_e[i,j] <- output$product[num_a+num_c+num_e+k]
-cov_e[j,i] <- cov_e[i,j]
-k <- k + 1
-}
-}
-
-
-return(list(beta_a_mc = beta_a_mc, beta_c_mc = beta_c_mc, beta_e_mc = beta_e_mc, cov_a = cov_a, cov_c = cov_c, cov_e = cov_e))
+return(list(beta_a_mc = beta_a_mc, beta_c_mc = beta_c_mc, beta_e_mc = beta_e_mc, cov = cov_t))
 
 
 }

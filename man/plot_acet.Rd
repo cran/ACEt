@@ -19,7 +19,7 @@ An object obtained from the B-splines or P-splines functions. For the P-splines 
 An logical  indicator of whether the confidence bands estimated from the bootstrap method are plotted. The default is FALSE. Only available for the AtCtEt model.
 }
   \item{heri}{
-A logical indicator of whether to plot the dynamic heritability curve (currently only available for the B-splines). The default is FALSE.
+A logical indicator of whether to plot the dynamic heritability curve. The default is FALSE.
 }
 }
 
