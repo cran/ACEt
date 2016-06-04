@@ -307,12 +307,24 @@ RcppExport SEXP loglik_AtCtEt_epsp_g_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_
 	double YSY_d = 0;
 	double D_m = 0;
 	double D_d = 0;
+	
+	double limit_e = -10;
+	double limit_u = 20;
 
 	for(int i = 0; i < (0.5*num_m); i++)
 	{
 		int start = 2*i;
 		int end = start + 1;
-		arma::mat V_m = exp(as_scalar(b_e_m.row(start)*be))*diag+exp(as_scalar(b_c_m.row(start)*bc))*k_m+exp(as_scalar(b_a_m.row(start)*ba))*k_m;
+		double temp_e_p = as_scalar(b_e_m.row(start)*be);
+		if(temp_e_p<limit_e)
+		  temp_e_p = limit_e;
+		double temp_c_p = as_scalar(b_c_m.row(start)*bc);
+		if(temp_c_p>limit_u)
+		  temp_c_p = limit_u;
+		double temp_a_p = as_scalar(b_a_m.row(start)*ba);
+		if(temp_a_p>limit_u)
+		  temp_a_p = limit_u;
+		arma::mat V_m = exp(temp_e_p)*diag+exp(temp_c_p)*k_m+exp(temp_a_p)*k_m;
 		double det_m = V_m(0,0)*V_m(0,0)-V_m(0,1)*V_m(0,1);
 		//inv_V_m = inv(V_m);
 		arma::mat inv_V_m = V_m/det_m;
@@ -331,7 +343,16 @@ RcppExport SEXP loglik_AtCtEt_epsp_g_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_
 	{
 		int start = 2*i;
 		int end = start + 1;
-		arma::mat V_d = exp(as_scalar(b_e_d.row(start)*be))*diag+exp(as_scalar(b_c_d.row(start)*bc))*k_3d+exp(as_scalar(b_a_d.row(start)*ba))*(k_1d+k_2d);
+		double temp_e_p = as_scalar(b_e_d.row(start)*be);
+		if(temp_e_p<limit_e)
+		  temp_e_p = limit_e;
+		double temp_c_p = as_scalar(b_c_d.row(start)*bc);
+		if(temp_c_p>limit_u)
+		  temp_c_p = limit_u;
+		double temp_a_p = as_scalar(b_a_d.row(start)*ba);
+		if(temp_a_p>limit_u)
+		  temp_a_p = limit_u;
+		arma::mat V_d = exp(temp_e_p)*diag+exp(temp_c_p)*k_3d+exp(temp_a_p)*(k_1d+k_2d);
 		//arma::mat inv_V_d = inv(V_d);
 		arma::mat inv_V_d(2,2);
 		double det_d = V_d(0,0)*V_d(0,0)-V_d(0,1)*V_d(0,1);
@@ -355,7 +376,7 @@ RcppExport SEXP loglik_AtCtEt_epsp_g_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_
 	if(ve>0)
 		res += as_scalar(trans(be)*d_e*be)/ve;
 
-	return(Rcpp::wrap(res));
+	return(Rcpp::wrap(res/2));
 }
 
 RcppExport SEXP gr_AtCtEt_epsp_g_c(SEXP b_a, SEXP b_c,  SEXP b_e, SEXP pheno_m, SEXP pheno_d, SEXP B_a_m, SEXP B_a_d, SEXP B_c_m, SEXP B_c_d, SEXP B_e_m, SEXP B_e_d, SEXP v_b_a, SEXP v_b_c, SEXP v_b_e, SEXP D_a, SEXP D_c, SEXP D_e)
@@ -397,17 +418,29 @@ RcppExport SEXP gr_AtCtEt_epsp_g_c(SEXP b_a, SEXP b_c,  SEXP b_e, SEXP pheno_m, 
 	k_2d.fill(0.5);
 	k_3d.fill(1);
 	
-	arma::vec v_b_a_m = arma::ones<arma::vec>(num_a);
-	arma::vec v_b_c_m = arma::ones<arma::vec>(num_c);
-	arma::vec v_b_e_m = arma::ones<arma::vec>(num_e);
+	double limit_e = -10;
+	double limit_u = 20;
+	
+	arma::vec v_b_a_m = arma::zeros<arma::vec>(num_a);
+	arma::vec v_b_c_m = arma::zeros<arma::vec>(num_c);
+	arma::vec v_b_e_m = arma::zeros<arma::vec>(num_e);
 	
 	for(int i = 0; i<(0.5*num_m); i++)
 	{
 		int start = 2*i;
 		int end = start + 1;
-		double ba_m = exp(as_scalar(b_a_m.row(start)*ba));
-		double bc_m = exp(as_scalar(b_c_m.row(start)*bc));
-		double be_m = exp(as_scalar(b_e_m.row(start)*be));
+		double temp_e_p = as_scalar(b_e_m.row(start)*be);
+		if(temp_e_p<limit_e)
+		  temp_e_p = limit_e;
+		double temp_c_p = as_scalar(b_c_m.row(start)*bc);
+		if(temp_c_p>limit_u)
+		  temp_c_p = limit_u;
+		double temp_a_p = as_scalar(b_a_m.row(start)*ba);
+		if(temp_a_p>limit_u)
+		  temp_a_p = limit_u;
+		double ba_m = exp(temp_a_p);
+		double bc_m = exp(temp_c_p);
+		double be_m = exp(temp_e_p);
 		arma::mat V_m = be_m*diag + ba_m*k_m + bc_m*k_m;
 		arma::mat inv_V_m = inv(V_m);
 		arma::vec p_m_v(2);
@@ -434,17 +467,26 @@ RcppExport SEXP gr_AtCtEt_epsp_g_c(SEXP b_a, SEXP b_c,  SEXP b_e, SEXP pheno_m, 
 		}
 	}
 
-	arma::vec v_b_a_d = arma::ones<arma::vec>(num_a);
-	arma::vec v_b_c_d = arma::ones<arma::vec>(num_c);
-	arma::vec v_b_e_d = arma::ones<arma::vec>(num_e);
+	arma::vec v_b_a_d = arma::zeros<arma::vec>(num_a);
+	arma::vec v_b_c_d = arma::zeros<arma::vec>(num_c);
+	arma::vec v_b_e_d = arma::zeros<arma::vec>(num_e);
 	
 	for(int i = 0; i<(0.5*num_d); i++)
 	{
 		int start = 2*i;
 		int end = start + 1;
-		double ba_d = exp(as_scalar(b_a_d.row(start)*ba));
-		double bc_d = exp(as_scalar(b_c_d.row(start)*bc));
-		double be_d = exp(as_scalar(b_e_d.row(start)*be));
+		double temp_e_p = as_scalar(b_e_d.row(start)*be);
+		if(temp_e_p<limit_e)
+		  temp_e_p = limit_e;
+		double temp_c_p = as_scalar(b_c_d.row(start)*bc);
+		if(temp_c_p>limit_u)
+		  temp_c_p = limit_u;
+		double temp_a_p = as_scalar(b_a_d.row(start)*ba);
+		if(temp_a_p>limit_u)
+		  temp_a_p = limit_u;
+		double ba_d = exp(temp_a_p);
+		double bc_d = exp(temp_c_p);
+		double be_d = exp(temp_e_p);
 		arma::mat V_d = be_d*diag + ba_d*(k_1d+k_2d) + bc_d*k_3d;
 		arma::mat inv_V_d = inv(V_d);
 		arma::vec p_d_v(2);
@@ -494,7 +536,7 @@ RcppExport SEXP gr_AtCtEt_epsp_g_c(SEXP b_a, SEXP b_c,  SEXP b_e, SEXP pheno_m, 
 	{
 		res(i+num_a+num_c) = res_e(i);
 	}
-	return(Rcpp::wrap(res));
+	return(Rcpp::wrap(res/2));
 }
 
 RcppExport SEXP gr_AtCtEt_epsp_c(SEXP v_b_a, SEXP v_b_c, SEXP v_b_e, SEXP pheno_m, SEXP pheno_d, SEXP B_a_m, SEXP B_a_d, SEXP b_a, SEXP D_a, SEXP B_c_m, SEXP B_c_d, SEXP b_c, SEXP D_c, SEXP B_e_m, SEXP B_e_d, SEXP b_e, SEXP D_e)

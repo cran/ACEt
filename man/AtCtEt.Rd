@@ -2,7 +2,7 @@
 \alias{AtCtEt}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-The ACE(t) model  
+Fitting the ACE(t) model  
 }
 \description{
 The ACE(t) model with the A, C and E variance components as functions with respect to age modelled by B-splines.
@@ -60,13 +60,14 @@ An integer indicating the number of different initial values that the function w
   \item{beta_a }{The estimated spline coefficients (if the model parameter is 'd') or variance (if the model parameter is 'c') of the A component.}
   \item{beta_c }{The estimated spline coefficients (if the model parameter is 'd') or variance (if the model parameter is 'c') of the C component.}
   \item{beta_e }{The estimated spline coefficients (if the model parameter is 'd') or variance (if the model parameter is 'c') of the E component.}
-  \item{hessian }{The approximated Hessian matrix from the minus log-likelihood.}
+  \item{hessian_ap }{The approximated Hessian matrix from the quasi-Newton algorithm.}
+  \item{hessian }{The Hessian matrix calculated analytically.}
   \item{con }{An indicator of convergence of the optimization algorithm. An integer code 0 indicates successful completion. See 'optim' for more details.}
   \item{lik }{The minus log-likelihood.}
   \item{knots_a }{A vector of the knot positions for the A component.}
   \item{knots_c }{A vector of the knot positions for the C component.}
   \item{knots_e }{A vector of the knot positions for the E component.}
-  \item{boot }{A list containing confidence bands estimated from the bootstrap method when \eqn{boot=TRUE}}
+  \item{boot }{A list containing pointwise CIs estimated from the bootstrap method when \eqn{boot=TRUE}}
 %% ...
 }
 
@@ -77,7 +78,7 @@ The optimization algorithm may sometimes end up with a local minimum. It is reco
 
 
 \references{
-He, L., Sillanp‰‰, M. J., Silventoinen, K., Kaprio, J., & Pitk‰niemi, J. (2016). Estimating Modifying Effect of Age on Genetic and Environmental Variance Components in Twin Models. Genetics, genetics-115.
+He, L., Sillanp√§√§, M.J., Silventoinen, K., Kaprio, J. and Pitk√§niemi, J., 2016. Estimating Modifying Effect of Age on Genetic and Environmental Variance Components in Twin Models. Genetics, 202(4), pp.1313-1328.
 }
 \author{
 Liang He

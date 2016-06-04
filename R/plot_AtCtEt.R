@@ -1,4 +1,4 @@
-plot_AtCtEt <- function(AtCtEt, boot=FALSE)
+plot_AtCtEt <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col, legend)
 {
 	if(class(AtCtEt)!='AtCtEt_model')
 	{
@@ -59,13 +59,13 @@ plot_AtCtEt <- function(AtCtEt, boot=FALSE)
 	fisher <- solve(model_cur$hessian[n_beta,n_beta])
 	
 	max_v <- max(points_c, points_a, points_e)*1.2
-	plot(range(x), c(0,max_v), type = "n", xlab = "Age", ylab = "Variance",main =  "Variance curves of the A, C, and E components")
+	plot(range(x), c(0,max_v), type = "n", xlab = xlab, ylab = ylab, main = main)
 	
 	index <- 1
 	# bb <- splineDesign(model_cur$knots_a, x = x, ord=order, outer.ok = TRUE)
-	lines(x, points_a, col = "red", lwd = 2)
-	lines(x, points_c, col = "blue", lwd = 2)
-	lines(x, points_e, col = "pink", lwd = 2)
+	lines(x, points_a, col = col[1], lwd = 2)
+	lines(x, points_c, col = col[2], lwd = 2)
+	lines(x, points_e, col = col[3], lwd = 2)
 
 	if(boot == TRUE)
 	{
@@ -176,6 +176,9 @@ plot_AtCtEt <- function(AtCtEt, boot=FALSE)
 	
 	} # boot == FALSE
 	
-	legend(x[1], max_v, c('Additive genetic component','Common environmental component', 'Unique environmental component'), col = c('red','blue','pink'), lty=c(1,1,1), lwd=c(2,2,2))
-
+  if(legend==TRUE)
+  {
+    legend(x[1], max_v, c('Additive genetic component','Common environmental component', 'Unique environmental component'), col = col, lty=c(1,1,1), lwd=c(2,2,2))
+  }
+	
 }

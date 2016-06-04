@@ -1,4 +1,4 @@
-plot_AtCtEt_h <- function(AtCtEt, boot=FALSE)
+plot_AtCtEt_h <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col)
 {
 	if((class(AtCtEt)!='AtCtEt_model')&(class(AtCtEt)!='AtCtEtp_mc_model'))
 	{
@@ -63,12 +63,12 @@ plot_AtCtEt_h <- function(AtCtEt, boot=FALSE)
 		#fisher <- solve(model_cur$hessian[2:(1+l_a+l_c),2:(1+l_a+l_c)])
 		fisher <- solve(model_cur$hessian[n_beta,n_beta])
 	
-		max_v <- max(points_h)*1.2
-		plot(range(x), c(0,max_v), type = "n", xlab = "Age", ylab = "Heritability",main =  "Dynamic heritability")
+		max_v <- 1
+		plot(range(x), c(0,max_v), type = "n", xlab = xlab, ylab = ylab, main = main)
 	
 		index <- 1
 		# bb <- splineDesign(model_cur$knots_a, x = x, ord=order, outer.ok = TRUE)
-		lines(x, points_h, col = "black", lwd = 2)
+		lines(x, points_h, col = col[1], lwd = 2)
 		#lines(x, points_c, col = "blue", lwd = 2)
 		#lines(x, points_e, col = "pink", lwd = 2)
 
@@ -198,10 +198,10 @@ plot_AtCtEt_h <- function(AtCtEt, boot=FALSE)
 		#fisher[(1+l_a):(l_a+l_c), (1+l_a):(l_a+l_c)] <- model_cur$cov_c
 		#fisher[(1+l_a+l_c):(l_a+l_c+l_e), (1+l_a+l_c):(l_a+l_c+l_e)] <- model_cur$cov_e
 	
-		max_v <- max(points_h)*1.2
-		plot(range(x), c(0,max_v), type = "n", xlab = "Age", ylab = "Heritability", main =  "Dynamic heritability")
+		max_v <- 1
+		plot(range(x), c(0,max_v), type = "n", xlab = xlab, ylab = ylab, main = main)
 
-		lines(x, points_h, col = "black", lwd = 2)
+		lines(x, points_h, col = col[1], lwd = 2)
 		e_a <- exp(bb_c%*%model_cur$beta_c_mc-bb_a%*%model_cur$beta_a_mc)
 		e_b <- exp(bb_e%*%model_cur$beta_e_mc-bb_a%*%model_cur$beta_a_mc)
 		lower <- rep(NA, length(x))

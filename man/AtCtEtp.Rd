@@ -2,13 +2,14 @@
 \alias{AtCtEtp}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-The ACE(t)-p model 
+Fitting the ACE(t)-p model 
 }
 \description{
 The ACE(t)-p model with the A, C and E variance components as functions with respect to age modelled by P-splines.
 }
 \usage{
-AtCtEtp(data_m, data_d, knot_a = 8, knot_c = 8, knot_e = 8, eps = 0.1, mod=c('d','d','d'))
+AtCtEtp(data_m, data_d, knot_a = 8, knot_c = 8, knot_e = 8, eps = 0.1, 
+mod=c('d','d','d'), robust = 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -36,6 +37,9 @@ Tolerance for convergence of the EM algorithm iterations. The default value is 0
   \item{mod}{
 A character vector of length 3. Each element specifies the function for the A, C or E component respectively. The components can be 'd'(dynamic), 'c'(constant) or 'l'(linear). The default is c('d','d','d').
 }
+  \item{robust}{
+  An integer indicating the number of different initial values that the function will randomly generate and try in the optimization. The default value is 0.
+  }
 }
 
 \value{
@@ -55,13 +59,13 @@ A character vector of length 3. Each element specifies the function for the A, C
 }
 
 \details{
-When the 'mod' parameter for a component is 'd'(dynamic), the corresponding 'beta' is the spline coefficients.   
-When the 'mod' parameter for a component is 'l'(linear), the corresponding 'beta' is a vector of two values, the exponential of which (exp(beta)) are the variances at the minimum and maximum age (or other covariates) provided in the data.     
-When the 'mod' parameter for a component is 'c'(constant), the corresponding 'beta' has only one value and exp(beta) is the variance.
+When the 'mod' argument for a component is 'd'(dynamic), the corresponding 'beta' is the spline coefficients.   
+When the 'mod' argument for a component is 'l'(linear), the corresponding 'beta' is a vector of two values, the exponential of which (exp(beta)) are the variances at the minimum and maximum age (or other covariates) provided in the data.     
+When the 'mod' argument for a component is 'c'(constant), the corresponding 'beta' has only one value and exp(beta) is the variance.
 }
 
 \references{
-He, L., Sillanp‰‰, M. J., Silventoinen, K., Kaprio, J., & Pitk‰niemi, J. (2016). Estimating Modifying Effect of Age on Genetic and Environmental Variance Components in Twin Models. Genetics, genetics-115.
+He, L., Sillanp√§√§, M.J., Silventoinen, K., Kaprio, J. and Pitk√§niemi, J., 2016. Estimating Modifying Effect of Age on Genetic and Environmental Variance Components in Twin Models. Genetics, 202(4), pp.1313-1328.
 }
 
 \author{

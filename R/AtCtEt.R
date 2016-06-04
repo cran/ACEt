@@ -12,16 +12,16 @@ init_max <- log(mag)
 init_min <- log(mag) - abs(log(mag))*1.3
 
 if((is.vector(mod)==FALSE) | (length(mod)!=3) )
-{stop('The model parameter must be a vector of length 3.')}
+{stop('The \'mod\' argument must be a vector of length 3.')}
 
 if(!(mod[1] %in% c('d','c','n')))
-{stop('The \'mod\' parameter for the A component must be \'d\'(dynamic), \'c\'(constant) or \'n\'(NA).')}
+{stop('The \'mod\' argument for the A component must be \'d\'(dynamic), \'c\'(constant) or \'n\'(NA).')}
 
 if(!(mod[2] %in% c('d','c','n')))
-{stop('The \'mod\' parameter for the C component must be \'d\'(dynamic), \'c\'(constant) or \'n\'(NA).')}
+{stop('The \'mod\' argument for the C component must be \'d\'(dynamic), \'c\'(constant) or \'n\'(NA).')}
 
 if(!(mod[3] %in% c('d','c')))
-{stop('The \'mod\' parameter for the E component must be \'d\'(dynamic), \'c\'(constant).')}
+{stop('The \'mod\' argument for the E component must be \'d\'(dynamic), \'c\'(constant).')}
 
 order <- 3
 if(mod[1]=='d')

@@ -271,3 +271,74 @@ return(list(beta_a_mc = beta_a_mc, beta_c_mc = beta_c_mc, beta_e_mc = beta_e_mc,
 
 
 }
+
+
+mcmc_epsp_AtCtEt_2 <-
+  function(pheno_m, pheno_d, B_des_a_m, B_des_a_d, B_des_c_m, B_des_c_d, B_des_e_m, B_des_e_d, var_b_a, var_b_c, var_b_e, D_a, D_c, D_e, iter=10000, burn=500, sd=0.1)
+  {
+    
+    num_m <- length(pheno_m)
+    num_d <- length(pheno_d)
+    num_a <- ncol(B_des_a_m)
+    num_c <- ncol(B_des_c_m)
+    num_e <- ncol(B_des_e_m)
+    
+    B_a_m <- t(B_des_a_m)
+    B_a_d <- t(B_des_a_d)
+    B_c_m <- t(B_des_c_m)
+    B_c_d <- t(B_des_c_d)
+    B_e_m <- t(B_des_e_m)
+    B_e_d <- t(B_des_e_d)
+    
+    num_t <- num_a+num_c+num_e
+    # multResult <- rep(0,num_a+num_c+num_e+(num_a+1)*num_a/2+(num_c+1)*num_c/2+(num_e+1)*num_e/2+1)
+    multResult <- rep(0,num_t+(num_t+1)*num_t/2+1)
+    
+    output =.C("CWrapper_mcmc_atctet_2",
+               product = as.double(multResult),
+               num_p_mz = as.integer(num_m),
+               num_p_dz = as.integer(num_d),
+               num_col_a = as.integer(num_a),
+               num_col_c = as.integer(num_c),
+               num_col_e = as.integer(num_e),
+               ph_m = as.double(pheno_m),
+               ph_d = as.double(pheno_d),
+               B_des_a_m = as.double(B_a_m),
+               B_des_a_d = as.double(B_a_d),
+               B_des_c_m = as.double(B_c_m),
+               B_des_c_d = as.double(B_c_d),
+               B_des_e_m = as.double(B_e_m),
+               B_des_e_d = as.double(B_e_d),
+               var_b_a = as.double(var_b_a),
+               var_b_c = as.double(var_b_c),
+               var_b_e = as.double(var_b_e),
+               D_a = as.double(D_a),
+               D_c = as.double(D_c),
+               D_e = as.double(D_e),
+               iter_n = as.integer(iter),
+               burn = as.integer(burn),
+               sd_mcmc = as.double(sd)
+    )
+    
+    beta_a_mc <- output$product[1:num_a]
+    beta_c_mc <- output$product[(1+num_a):(num_a+num_c)]
+    beta_e_mc <- output$product[(1+num_a+num_c):(num_a+num_c+num_e)]
+    
+    k <- 1
+    cov_t <- matrix(0, num_t, num_t)
+    for(i in 1:num_t)
+    {
+      for(j in i:num_t)
+      {
+        cov_t[i,j] <- output$product[num_t+k]
+        cov_t[j,i] <- cov_t[i,j]
+        k <- k + 1
+      }
+    }
+    
+    return(list(beta_a_mc = beta_a_mc, beta_c_mc = beta_c_mc, beta_e_mc = beta_e_mc, cov = cov_t))
+    
+    
+  }
+
+

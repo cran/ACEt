@@ -5,7 +5,7 @@
 Compute CIs for the ACE(t)-p model
 }
 \description{
-Compute CIs for the ACE(t)-p model using the MCMC methods and the bootstrap method
+Compute the posterior mean and CIs for the ACE(t)-p model using the MCMC methods
 }
 \usage{
 acetp_mcmc(acetp, iter_num = 10000, sd = 0.1, burnin = 1000)
@@ -13,10 +13,10 @@ acetp_mcmc(acetp, iter_num = 10000, sd = 0.1, burnin = 1000)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{acetp}{
-An object of the AtCtEtp_model (or AtCtEp_model, AtEtp_model).
+An object from the 'AtCtEtp' function.
 }
   \item{iter_num}{
-The number of MCMC iteration.
+The number of the iterations in the MCMC procedure.
 }
   \item{sd}{
 The standard error of the normal proposal distribution in the MCMC algorithm. The default value is 0.1.
@@ -31,13 +31,15 @@ The number of burn-in, which must be smaller than the number of iteration.
   \item{beta_a_mc }{The estimates of the spline coefficients for the A component based on the posterior mean from the MCMC method.}
   \item{beta_c_mc }{The estimates of the spline coefficients for the C component based on the posterior mean from the MCMC method.}
   \item{beta_e_mc }{The estimates of the spline coefficients for the E component based on the posterior mean from the MCMC method.}
-  \item{cov_a_mc }{The posterior covariance matrix of the estimates of the spline coefficients for the A component.}
-  \item{cov_c_mc }{The posterior covariance matrix of the estimates of the spline coefficients for the C component.}
-  \item{cov_e_mc }{The posterior covariance matrix of the estimates of the spline coefficients for the E component.}
+  \item{cov_mc }{The posterior covariance matrix of the estimates of the spline coefficients.}
+  \item{knots_a }{A vector of the knot positions for the A component.}
+  \item{knots_c }{A vector of the knot positions for the C component.}
+  \item{knots_e }{A vector of the knot positions for the E component.}
+
 %% ...
 }
 \references{
-Liang He, Mikko J. Sillanp‰‰, Karri Silventoinen, Jaakko Kaprio, Janne Pitk‰niemi, Estimating modifying effect of age on genetic and environmental variance components in twin models. Genetics, 2016
+He, L., Sillanp√§√§, M.J., Silventoinen, K., Kaprio, J. and Pitk√§niemi, J., 2016. Estimating Modifying Effect of Age on Genetic and Environmental Variance Components in Twin Models. Genetics, 202(4), pp.1313-1328.
 }
 \author{
 Liang He

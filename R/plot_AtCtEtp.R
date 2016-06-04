@@ -1,4 +1,4 @@
-plot_AtCtEtp <- function(AtCtEtp_mcmc)
+plot_AtCtEtp <- function(AtCtEtp_mcmc, xlab, ylab, main, col, legend)
 {
 	if(class(AtCtEtp_mcmc)!='AtCtEtp_mc_model')
 	{
@@ -68,10 +68,10 @@ plot_AtCtEtp <- function(AtCtEtp_mcmc)
 	}
 	points_e <- exp(bb_e%*%model_cur$beta_e_mc)
 
-	plot(range(x), c(0,max(points_c, points_a, points_e)+1), type = "n", xlab = "Age", ylab = "Variance",main =  "Variance curves of the A, C and E components")
+	plot(range(x), c(0,max(points_c, points_a, points_e)+1), type = "n", xlab = xlab, ylab = ylab, main = main)
 	
 	#bb <- splineDesign(model_cur$knots_a, x = x, ord=order, outer.ok = TRUE)
-	lines(x, points_a, col = "red", lwd = 2)
+	lines(x, points_a, col = col[1], lwd = 2)
 
 	fisher_a <- model_cur$cov_mc[1:n_a,1:n_a]
 	lower <- rep(NA, length(x))
@@ -90,7 +90,7 @@ plot_AtCtEtp <- function(AtCtEtp_mcmc)
 	polygon(c(x, rev(x)),c(exp(upper), rev(exp(lower))),col='grey',border = NA, lty=3, density=20)
 
 	
-	lines(x, points_c, col = "blue", lwd = 2)
+	lines(x, points_c, col = col[2], lwd = 2)
 	fisher_c <- model_cur$cov_mc[(n_a+1):(n_a+n_c),(n_a+1):(n_a+n_c)]
 	lower <- rep(NA, length(x))
 	upper <- rep(NA, length(x))
@@ -107,7 +107,7 @@ plot_AtCtEtp <- function(AtCtEtp_mcmc)
 	lines(x, exp(upper), col = "green" ,lty = 2 , lwd = 0.6)
 	polygon(c(x, rev(x)),c(exp(upper), rev(exp(lower))),col='grey',border = NA, lty=3, density=20)
 
-	lines(x, points_e, col = "pink", lwd = 2)
+	lines(x, points_e, col = col[3], lwd = 2)
 
 	fisher_e <- model_cur$cov_mc[(n_a+n_c+1):(n_a+n_c+n_e),(n_a+n_c+1):(n_a+n_c+n_e)]
 	lower <- rep(NA, length(x))
@@ -125,7 +125,9 @@ plot_AtCtEtp <- function(AtCtEtp_mcmc)
 	lines(x, exp(upper), col = "yellow" ,lty = 2 , lwd = 0.6)
 	polygon(c(x, rev(x)),c(exp(upper), rev(exp(lower))),col='grey',border = NA, lty=3, density=20)
 	
-
-	legend(x[1], max(points_c, points_a, points_e)+1, c('Additive genetic component','Common environmental component', 'Unique environmental component'), col = c('red','blue','pink'), lty=c(1,1,1), lwd=c(2,2,2))
-
+  if(legend==TRUE)
+  {
+    legend(x[1], max(points_c, points_a, points_e)+1, c('Additive genetic component','Common environmental component', 'Unique environmental component'), col = col, lty=c(1,1,1), lwd=c(2,2,2))
+  }
+	
 }

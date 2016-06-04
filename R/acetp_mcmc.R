@@ -12,52 +12,22 @@ acetp_mcmc <- function(acetp, iter_num = 10000, sd = 0.1, burnin =1000)
 	}
 
 
-	if(class(acetp)=='AtCtEp_model')
-	{
-		res <- AtCtEp_mcmc(acetp, iter_num, sd, burnin)
-		return(res)
-	}
-
 	if(class(acetp)=='AtCtEtp_model')
 	{
 		res <- AtCtEtp_mcmc(acetp, iter_num, sd, burnin)
 		return(res)
 	}
 
-	if(class(acetp)=='AtEtp_model')
-	{
-		res <- AtEtp_mcmc(acetp, iter_num, sd, burnin)
-		return(res)
-	}
+	#if(class(acetp)=='AtEtp_model')
+	#{
+	#	res <- AtEtp_mcmc(acetp, iter_num, sd, burnin)
+	#	return(res)
+	#}
 	
 }
 
 
 
-AtCtEp_mcmc <-
-function(AtCtEp, iter_num = 10000, sd = 0.1, burnin =1000)
-{
-
-if(class(AtCtEp)!='AtCtEp_model')
-{
-	stop('The first parameter must be an object obtained from the AtCtEp function.')
-}
-
-order <- 3
-
-B_des_a_m <- splineDesign(AtCtEp$knot_a, x=AtCtEp$T_m, ord=order)
-B_des_a_d <- splineDesign(AtCtEp$knot_a, x=AtCtEp$T_d, ord=order)
-B_des_c_m <- splineDesign(AtCtEp$knot_c, x=AtCtEp$T_m, ord=order)
-B_des_c_d <- splineDesign(AtCtEp$knot_c, x=AtCtEp$T_d, ord=order)
-
-result <- mcmc_epsp(AtCtEp$pheno_m, AtCtEp$pheno_d, B_des_a_m, B_des_a_d, B_des_c_m, B_des_c_d, AtCtEp$var, AtCtEp$var_b_a, AtCtEp$var_b_c, AtCtEp$D_a, AtCtEp$D_c, iter_num, burnin, sd)
-
-AtCtEp_mc_mod <- list(beta_a_mc=result$beta_a_mc, beta_c_mc=result$beta_c_mc, cov_a_mc = result$cov_a, cov_c_mc = result$cov_c, knots_a=AtCtEp$knot_a, knots_c=AtCtEp$knot_c, min_t = min(AtCtEp$T_m, AtCtEp$T_d), max_t = max(AtCtEp$T_m, AtCtEp$T_d))
-
-class(AtCtEp_mc_mod) <- 'AtCtEp_mc_model'
-
-return(AtCtEp_mc_mod)
-}
 
 AtCtEtp_mcmc <-
 function(AtCtEtp, iter_num = 10000, sd = 0.1, burnin =1000)
@@ -144,30 +114,127 @@ class(AtCtEtp_mc_mod) <- 'AtCtEtp_mc_model'
 return(AtCtEtp_mc_mod)
 }
 
-AtEtp_mcmc <-
-function(AtEtp, iter_num = 10000, sd = 0.1, burnin =1000)
-{
 
-if(class(AtEtp)!='AtEtp_model')
-{
-	stop('The first parameter must be an object obtained from the AtEtp function.')
-}
-
-model_cur <- AtEtp
-
-order <- 3
-
-B_des_a_m <- splineDesign(model_cur$knot_a, x=model_cur$T_m, ord=order)
-B_des_a_d <- splineDesign(model_cur$knot_a, x=model_cur$T_d, ord=order)
-B_des_e_m <- splineDesign(model_cur$knot_e, x=model_cur$T_m, ord=order)
-B_des_e_d <- splineDesign(model_cur$knot_e, x=model_cur$T_d, ord=order)
-
-result <- mcmc_epsp_AtEt(model_cur$pheno_m, model_cur$pheno_d, B_des_a_m, B_des_a_d, B_des_e_m, B_des_e_d, model_cur$var_b_a, model_cur$var_b_e, model_cur$D_a, model_cur$D_e, iter_num, burnin, sd)
-
-AtEtp_mc_mod <- list(beta_a_mc=result$beta_a_mc, beta_e_mc=result$beta_e_mc, cov_a_mc = result$cov_a, cov_e_mc = result$cov_e, knots_a=model_cur$knot_a, knots_e=model_cur$knot_e, min_t = min(AtEtp$T_m, AtEtp$T_d), max_t = max(AtEtp$T_m, AtEtp$T_d))
-
-class(AtEtp_mc_mod) <- 'AtEtp_mc_model'
-
-return(AtEtp_mc_mod)
-}
+acetp_mcmc_2 <- function(AtCtEtp, iter_num = 5000, sd = 0.1, burnin =500)
+  {
+    
+    if(class(AtCtEtp)!='AtCtEtp_model')
+    {
+      stop('The first parameter must be an object obtained from the AtCtEtp function.')
+    }
+    
+    T_m <- AtCtEtp$T_m
+    num_m <- length(T_m)
+    T_d <- AtCtEtp$T_d
+    num_d <- length(T_d)
+    
+    t_int <- max(c(T_m,T_d))-min(c(T_m,T_d))
+    
+    order <- 3
+    if(length(AtCtEtp$beta_a)>2)
+    {
+      ei_a <- eigen(AtCtEtp$D_a)
+      B_des_a_m <- splineDesign(AtCtEtp$knot_a, x=AtCtEtp$T_m, ord=order)
+      B_des_a_d <- splineDesign(AtCtEtp$knot_a, x=AtCtEtp$T_d, ord=order)
+      B_des_a_m <- B_des_a_m%*%ei_a$vectors
+      B_des_a_d <- B_des_a_d%*%ei_a$vectors
+      D_a <- diag(c(ei_a$values[1:(length(ei_a$values)-2)],0,0))
+    }else{
+      if(length(AtCtEtp$beta_a)==2)
+      {
+        k_a <- length(AtCtEtp$knot_a)-4
+        delta_a <- matrix(0, k_a+3-2-2, k_a+3-2)
+        for(i in 1:nrow(delta_a))
+        {
+          delta_a[i, i:(i+2)] <- c(1,-2,1)
+        }
+        D_a_n <- t(delta_a)%*%delta_a
+        ei_a <- eigen(D_a_n)
+        B_des_a_m <- splineDesign(AtCtEtp$knot_a, x=AtCtEtp$T_m, ord=order)
+        B_des_a_d <- splineDesign(AtCtEtp$knot_a, x=AtCtEtp$T_d, ord=order)
+        B_des_a_m <- B_des_a_m%*%ei_a$vectors
+        B_des_a_d <- B_des_a_d%*%ei_a$vectors
+        B_des_a_m <- B_des_a_m[,(ncol(B_des_a_m)-1):ncol(B_des_a_m)]
+        B_des_a_d <- B_des_a_d[,(ncol(B_des_a_d)-1):ncol(B_des_a_d)]
+        D_a <- AtCtEtp$D_a
+      }else{
+        B_des_a_m <- matrix(1, num_m, 1)
+        B_des_a_d <- matrix(1, num_d, 1)
+        D_a <- AtCtEtp$D_a
+      }
+    }
+    
+    if(length(AtCtEtp$beta_c)>2)
+    {
+      ei_c <- eigen(AtCtEtp$D_c)
+      B_des_c_m <- splineDesign(AtCtEtp$knot_c, x=AtCtEtp$T_m, ord=order)
+      B_des_c_d <- splineDesign(AtCtEtp$knot_c, x=AtCtEtp$T_d, ord=order)
+      B_des_c_m <- B_des_c_m%*%ei_c$vectors
+      B_des_c_d <- B_des_c_d%*%ei_c$vectors
+      D_c <- diag(c(ei_c$values[1:(length(ei_c$values)-2)],0,0))
+    }else{
+      if(length(AtCtEtp$beta_c)==2)
+      {
+        k_c <- length(AtCtEtp$knot_c)-4
+        delta_c <- matrix(0, k_c+3-2-2, k_c+3-2)
+        for(i in 1:nrow(delta_c))
+        {
+          delta_c[i, i:(i+2)] <- c(1,-2,1)
+        }
+        D_c_n <- t(delta_c)%*%delta_c
+        ei_c <- eigen(D_c_n)
+        B_des_c_m <- splineDesign(AtCtEtp$knot_c, x=AtCtEtp$T_m, ord=order)
+        B_des_c_d <- splineDesign(AtCtEtp$knot_c, x=AtCtEtp$T_d, ord=order)
+        B_des_c_m <- B_des_c_m%*%ei_c$vectors
+        B_des_c_d <- B_des_c_d%*%ei_c$vectors
+        B_des_c_m <- B_des_c_m[,(ncol(B_des_c_m)-1):ncol(B_des_c_m)]
+        B_des_c_d <- B_des_c_d[,(ncol(B_des_c_d)-1):ncol(B_des_c_d)]
+        D_c <- AtCtEtp$D_c
+      }else{
+        B_des_c_m <- matrix(1, num_m, 1)
+        B_des_c_d <- matrix(1, num_d, 1)
+        D_c <- AtCtEtp$D_c
+      }
+    }
+    if(length(AtCtEtp$beta_e)>2)
+    {
+      ei_e <- eigen(AtCtEtp$D_e)
+      B_des_e_m <- splineDesign(AtCtEtp$knot_e, x=AtCtEtp$T_m, ord=order)
+      B_des_e_d <- splineDesign(AtCtEtp$knot_e, x=AtCtEtp$T_d, ord=order)
+      B_des_e_m <- B_des_e_m%*%ei_e$vectors
+      B_des_e_d <- B_des_e_d%*%ei_e$vectors
+      D_e <- diag(c(ei_e$values[1:(length(ei_e$values)-2)],0,0))
+    }else{
+      if(length(AtCtEtp$beta_e)==2)
+      {
+        k_e <- length(AtCtEtp$knot_e)-4
+        delta_e <- matrix(0, k_e+3-2-2, k_e+3-2)
+        for(i in 1:nrow(delta_e))
+        {
+          delta_e[i, i:(i+2)] <- c(1,-2,1)
+        }
+        D_e_n <- t(delta_e)%*%delta_e
+        ei_e <- eigen(D_e_n)
+        B_des_e_m <- splineDesign(AtCtEtp$knot_e, x=AtCtEtp$T_m, ord=order)
+        B_des_e_d <- splineDesign(AtCtEtp$knot_e, x=AtCtEtp$T_d, ord=order)
+        B_des_e_m <- B_des_e_m%*%ei_e$vectors
+        B_des_e_d <- B_des_e_d%*%ei_e$vectors
+        B_des_e_m <- B_des_e_m[,(ncol(B_des_e_m)-1):ncol(B_des_e_m)]
+        B_des_e_d <- B_des_e_d[,(ncol(B_des_e_d)-1):ncol(B_des_e_d)]
+        D_e <- AtCtEtp$D_e
+      }else{
+        B_des_e_m <- matrix(1, num_m, 1)
+        B_des_e_d <- matrix(1, num_d, 1)
+        D_e <- AtCtEtp$D_e
+      }
+    }
+    
+    result <- mcmc_epsp_AtCtEt_2(AtCtEtp$pheno_m, AtCtEtp$pheno_d, B_des_a_m, B_des_a_d, B_des_c_m, B_des_c_d, B_des_e_m, B_des_e_d, AtCtEtp$var_b_a, AtCtEtp$var_b_c, AtCtEtp$var_b_e, D_a, D_c, D_e, iter_num, burnin, sd)
+    
+    AtCtEtp_mc_mod <- list(beta_a_mc=result$beta_a_mc, beta_c_mc=result$beta_c_mc, beta_e_mc=result$beta_e_mc, cov_mc = result$cov, knots_a=AtCtEtp$knot_a, knots_c=AtCtEtp$knot_c, knots_e=AtCtEtp$knot_e, min_t = min(AtCtEtp$T_m, AtCtEtp$T_d), max_t = max(AtCtEtp$T_m, AtCtEtp$T_d))
+    
+    class(AtCtEtp_mc_mod) <- 'AtCtEtp_mc_model'
+    
+    return(AtCtEtp_mc_mod)
+  }
 
