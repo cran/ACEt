@@ -68,7 +68,7 @@ plot_AtCtEtp <- function(AtCtEtp_mcmc, xlab, ylab, main, col, legend)
 	}
 	points_e <- exp(bb_e%*%model_cur$beta_e_mc)
 
-	plot(range(x), c(0,max(points_c, points_a, points_e)+1), type = "n", xlab = xlab, ylab = ylab, main = main)
+	plot(range(x), c(0,max(points_c, points_a, points_e)*1.2), type = "n", xlab = xlab, ylab = ylab, main = main)
 	
 	#bb <- splineDesign(model_cur$knots_a, x = x, ord=order, outer.ok = TRUE)
 	lines(x, points_a, col = col[1], lwd = 2)
@@ -127,7 +127,7 @@ plot_AtCtEtp <- function(AtCtEtp_mcmc, xlab, ylab, main, col, legend)
 	
   if(legend==TRUE)
   {
-    legend(x[1], max(points_c, points_a, points_e)+1, c('Additive genetic component','Common environmental component', 'Unique environmental component'), col = col, lty=c(1,1,1), lwd=c(2,2,2))
+    legend(x[1], max(points_c, points_a, points_e)*1.2, c('Additive genetic component','Common environmental component', 'Unique environmental component'), col = col, lty=c(1,1,1), lwd=c(2,2,2))
   }
 	
 }
