@@ -198,7 +198,9 @@ if((var_b_a <= 0.05)&(num_a>2))
 {
 ei_a <- eigen(D_a)
 G_a <- t(ei_a$vectors)
+eiv_a <- ei_a$values
 }else{
+eiv_a <- rep(1, num_a)
 G_a <- diag(rep(1,num_a))
 }
 
@@ -206,7 +208,9 @@ if((var_b_c <= 0.05)&(num_c>2))
 {
 ei_c <- eigen(D_c)
 G_c <- t(ei_c$vectors)
+eiv_c <- ei_c$values
 }else{
+eiv_c <- rep(1, num_c)
 G_c <- diag(rep(1,num_c))
 }
 
@@ -214,7 +218,9 @@ if((var_b_e <= 0.05)&(num_e>2))
 {
 ei_e <- eigen(D_e)
 G_e <- t(ei_e$vectors)
+eiv_e <- ei_e$values
 }else{
+eiv_e <- rep(1, num_e)
 G_e <- diag(rep(1,num_e))
 }
 
@@ -240,6 +246,9 @@ B_des_e_d = as.double(B_e_d),
 G_a = as.double(G_a),
 G_c = as.double(G_c),
 G_e = as.double(G_e),
+ei_a = as.double(eiv_a),
+ei_c = as.double(eiv_c),
+ei_e = as.double(eiv_e),
 var_b_a = as.double(var_b_a),
 var_b_c = as.double(var_b_c),
 var_b_e = as.double(var_b_e),

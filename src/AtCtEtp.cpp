@@ -252,6 +252,7 @@ RcppExport SEXP loglik_AtCtEt_epsp_c(SEXP v_b_a, SEXP v_b_c, SEXP v_b_e, SEXP ph
 	gsd_max.submat(num_a+num_c, num_a, num_a+num_c+num_e-1,num_a+num_c-1) = trans(gsd_max.submat(num_a,num_a+num_c,num_a+num_c-1,num_a+num_c+num_e-1));
 
 	double gsd = log(fabs(det(0.5*gsd_max)));
+	// double gsd = (num_a+num_c+num_e)*log(10)+log(fabs(det(0.5*(gsd_max/10))));
 
 	double res = D_m + YSY_m + D_d + YSY_d + gsd;
 	if(va>0)
@@ -260,7 +261,10 @@ RcppExport SEXP loglik_AtCtEt_epsp_c(SEXP v_b_a, SEXP v_b_c, SEXP v_b_e, SEXP ph
 		res += (num_c-penal_c)*log(vc) + as_scalar(trans(bc)*d_c*bc)/vc;
 	if(ve>0)
 		res += (num_e-penal_e)*log(ve) + as_scalar(trans(be)*d_e*be)/ve;
-
+	
+	// 2^31-1
+	if(res>2147483646)
+		res = 2147483646;
 	return(Rcpp::wrap(res));
 }
 

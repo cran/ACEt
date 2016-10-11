@@ -1,4 +1,4 @@
-\name{ACEt-package}
+﻿\name{ACEt-package}
 \alias{ACEt-package}
 \alias{ACEt}
 \docType{package}
@@ -12,8 +12,8 @@ The package implements two novel twin models that are able to estimate dynamic b
 \tabular{ll}{
 Package: \tab ACEt\cr
 Type: \tab Package\cr
-Version: \tab 1.6.9\cr
-Date: \tab 2016-09-09\cr
+Version: \tab 1.7.0\cr
+Date: \tab 2016-09-27\cr
 License: \tab GPL \cr
 }
 }

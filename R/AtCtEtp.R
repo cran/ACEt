@@ -34,7 +34,10 @@ init_max <- log(mag)
 init_min <- log(mag) - abs(log(mag))*1.2
 limit <- 12
 limit_e <- 10
-low_var <- mag/100000
+# low_var <- mag/100000
+low_var <- 1e-06
+var_ran_up <- 3
+var_ran_lo <- 1
 
 eps <- eps*2
 
@@ -186,19 +189,42 @@ n_e <- ncol(B_des_e_m)
 
 lower <- 0
 
-var_b_a <- runif(1,min=0.5*abs(log(mag)),max=1.5*abs(log(mag)))
+#if(is.na(init_var[1]))
+#{
+	var_b_a <- runif(1,min=var_ran_lo*abs(log(mag)),max=var_ran_up*abs(log(mag)))
+#}else{
+#	if((init_var[1]<20)&(init_var[1]>low_var))
+#	{var_b_a <- init_var[1]}else{var_b_a <- runif(1,min=var_ran_lo*abs(log(mag)),max=var_ran_up*abs(log(mag)))}
+#}
+
 if(mod[1] %in% c('l','c'))
 {
 	var_b_a <- lower
 	n_a <- ifelse(mod[1]=='l',2,1) 
 }
-var_b_c <- runif(1,min=0.5*abs(log(mag)),max=1.5*abs(log(mag)))
+
+#if(is.na(init_var[2]))
+#{
+	var_b_c <- runif(1,min=var_ran_lo*abs(log(mag)),max=var_ran_up*abs(log(mag)))
+#}else{
+#	if((init_var[2]<20)&(init_var[2]>low_var))
+#	{var_b_c <- init_var[2]}else{var_b_c <- runif(1,min=var_ran_lo*abs(log(mag)),max=var_ran_up*abs(log(mag)))}
+#}
+
 if(mod[2] %in% c('l','c'))
 {
 	var_b_c <- lower
 	n_c <- ifelse(mod[2]=='l',2,1) 
 }
-var_b_e <- runif(1,min=0.5*abs(log(mag)),max=1.5*abs(log(mag)))
+
+#if(is.na(init_var[3]))
+#{
+	var_b_e <- runif(1,min=var_ran_lo*abs(log(mag)),max=var_ran_up*abs(log(mag)))
+#}else{
+#	if((init_var[3]<20)&(init_var[3]>low_var))
+#	{var_b_e <- init_var[3]}else{var_b_e <- runif(1,min=var_ran_lo*abs(log(mag)),max=var_ran_up*abs(log(mag)))}
+#}
+
 if(mod[3] %in% c('l','c'))
 {
 	var_b_e <- lower
@@ -311,11 +337,11 @@ if((mod[1]!='d')&(mod[2]!='d')&(mod[3]!='d'))
       beta_c <- runif(n_c,min=init_min,max=init_max)
       beta_e <- runif(n_e,min=init_min,max=init_max)
       if(var_b_a!=0)
-      {var_b_a <- runif(1,min=1,max=3)}
+      {var_b_a <- runif(1,min=var_ran_lo*abs(log(mag)),max=var_ran_up*abs(log(mag)))}
       if(var_b_c!=0)
-      {var_b_c <- runif(1,min=1,max=3)}
+      {var_b_c <- runif(1,min=var_ran_lo*abs(log(mag)),max=var_ran_up*abs(log(mag)))}
       if(var_b_e!=0)
-      {var_b_e <- runif(1,min=1,max=3)}
+      {var_b_e <- runif(1,min=var_ran_lo*abs(log(mag)),max=var_ran_up*abs(log(mag)))}
       
       while(abs(lik-lik_pre)>eps)
 	    {

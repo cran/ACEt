@@ -552,7 +552,7 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 				  int * num_col_a, int * num_col_c, int * num_col_e, 
 				  double *ph_m, double *ph_d, 
 				  double *B_des_a_m, double *B_des_a_d, double *B_des_c_m, double *B_des_c_d, double *B_des_e_m, double *B_des_e_d, 
-				  double *G_a, double *G_c, double *G_e, double *var_b_a, double *var_b_c, double *var_b_e, 
+				  double *G_a, double *G_c, double *G_e, double *ei_a, double *ei_c, double *ei_e, double *var_b_a, double *var_b_c, double *var_b_e, 
 				  int *D_a, int *D_c, int *D_e, 
 				  int *iter_n, int *burn, double *sd_mcmc)
 {
@@ -601,6 +601,9 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 	Mat_i D_C;
 	Mat_i D_A;
 	Mat_i D_E;
+	Vec e_a;
+	Vec e_c;
+	Vec e_e;
 	
 	double * p = ph_m;
 	for(int i = 0; i < NUM_SUB_M; i++)
@@ -722,6 +725,27 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			row_ge.push_back(temp);
 		}
 		g_e.push_back(row_ge);
+	}
+	
+	p2 = ei_a;
+	for(int i = 0; i < COL_A; i++)
+	{
+		double temp = *p2++;
+		e_a.push_back(temp);
+	}
+
+	p2 = ei_c;
+	for(int i = 0; i < COL_C; i++)
+	{
+		double temp = *p2++;
+		e_c.push_back(temp);
+	}
+
+	p2 = ei_e;
+	for(int i = 0; i < COL_E; i++)
+	{
+		double temp = *p2++;
+		e_e.push_back(temp);
 	}
 
 	int *p3 = D_a;
@@ -932,7 +956,8 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			{
 				for(int i = 0; i < (COL_A-penal_a); i++)
 				{
-					gen_type2 die_gen_a(generator, distribution_type2(a_t[i],step));
+					//gen_type2 die_gen_a(generator, distribution_type2(a_t[i],step));
+					gen_type2 die_gen_a(generator, distribution_type2(a_t[i],0.1*sqrt(step/e_a[i])));
 					boost::generator_iterator<gen_type2> die_a(&die_gen_a);
 					a_n[i] = *die_a++;
 				}
@@ -995,7 +1020,7 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			{
 				for(int i = 0; i < (COL_C-penal_c); i++)
 				{
-					gen_type2 die_gen_c(generator, distribution_type2(c_t[i],step));
+					gen_type2 die_gen_c(generator, distribution_type2(c_t[i],0.1*sqrt(step/e_c[i])));
 					boost::generator_iterator<gen_type2> die_c(&die_gen_c);
 					c_n[i] = *die_c++;
 				}
@@ -1059,7 +1084,7 @@ void ci_mh_atctet(double *result,int * num_p_mz, int * num_p_dz,
 			{
 				for(int i = 0; i < (COL_E-penal_e); i++)
 				{
-					gen_type2 die_gen_e(generator, distribution_type2(e_t[i],step));
+					gen_type2 die_gen_e(generator, distribution_type2(e_t[i],0.1*sqrt(step/e_e[i])));
 					boost::generator_iterator<gen_type2> die_e(&die_gen_e);
 					e_n[i] = *die_e++;
 				}

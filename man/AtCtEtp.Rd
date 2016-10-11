@@ -40,6 +40,7 @@ A character vector of length 3. Each element specifies the function for the A, C
   \item{robust}{
   An integer indicating the number of different initial values that the function will randomly generate and try in the optimization. The default value is 0.
   }
+
 }
 
 \value{
