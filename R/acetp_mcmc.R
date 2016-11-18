@@ -43,11 +43,14 @@ num_m <- length(T_m)
 T_d <- AtCtEtp$T_d
 num_d <- length(T_d)
 
-t_int <- max(c(T_m,T_d))-min(c(T_m,T_d))
-l_m_1 <- (max(c(T_m,T_d))-T_m)/t_int
-l_m_2 <- (T_m-min(c(T_m,T_d)))/t_int
-l_d_1 <- (max(c(T_m,T_d))-T_d)/t_int
-l_d_2 <- (T_d-min(c(T_m,T_d)))/t_int
+max_t <- max(c(T_m,T_d))
+min_t <- min(c(T_m,T_d))
+
+t_int <- max_t-min_t
+l_m_1 <- (max_t-T_m)/t_int
+l_m_2 <- (T_m-min_t)/t_int
+l_d_1 <- (max_t-T_d)/t_int
+l_d_2 <- (T_d-min_t)/t_int
 
 order <- 3
 if(length(AtCtEtp$beta_a)>2)
@@ -105,7 +108,7 @@ if(length(AtCtEtp$beta_e)>2)
 	}
 }
 
-result <- mcmc_epsp_AtCtEt(AtCtEtp$pheno_m, AtCtEtp$pheno_d, B_des_a_m, B_des_a_d, B_des_c_m, B_des_c_d, B_des_e_m, B_des_e_d, AtCtEtp$var_b_a, AtCtEtp$var_b_c, AtCtEtp$var_b_e, AtCtEtp$D_a, AtCtEtp$D_c, AtCtEtp$D_e, iter_num, burnin, sd)
+result <- mcmc_epsp_AtCtEt(AtCtEtp$pheno_m, AtCtEtp$pheno_d, B_des_a_m, B_des_a_d, B_des_c_m, B_des_c_d, B_des_e_m, B_des_e_d, AtCtEtp$var_b_a, AtCtEtp$var_b_c, AtCtEtp$var_b_e, AtCtEtp$beta_a, AtCtEtp$beta_c, AtCtEtp$beta_e, AtCtEtp$D_a, AtCtEtp$D_c, AtCtEtp$D_e, iter_num, burnin, sd)
 
 AtCtEtp_mc_mod <- list(beta_a_mc=result$beta_a_mc, beta_c_mc=result$beta_c_mc, beta_e_mc=result$beta_e_mc, cov_mc = result$cov, knots_a=AtCtEtp$knot_a, knots_c=AtCtEtp$knot_c, knots_e=AtCtEtp$knot_e, min_t = min(AtCtEtp$T_m, AtCtEtp$T_d), max_t = max(AtCtEtp$T_m, AtCtEtp$T_d))
 

@@ -178,7 +178,7 @@ return(list(beta_a_mc = beta_a_mc, beta_e_mc = beta_e_mc, cov_a = cov_a, cov_e =
 }
 
 mcmc_epsp_AtCtEt <-
-function(pheno_m, pheno_d, B_des_a_m, B_des_a_d, B_des_c_m, B_des_c_d, B_des_e_m, B_des_e_d, var_b_a, var_b_c, var_b_e, D_a, D_c, D_e, iter=10000, burn=500, sd=0.1)
+function(pheno_m, pheno_d, B_des_a_m, B_des_a_d, B_des_c_m, B_des_c_d, B_des_e_m, B_des_e_d, var_b_a, var_b_c, var_b_e, beta_a, beta_c, beta_e, D_a, D_c, D_e, iter=10000, burn=500, sd=0.1)
 {
 
 num_m <- length(pheno_m)
@@ -224,6 +224,10 @@ eiv_e <- rep(1, num_e)
 G_e <- diag(rep(1,num_e))
 }
 
+beta_a_t <- G_a%*%beta_a
+beta_c_t <- G_c%*%beta_c
+beta_e_t <- G_e%*%beta_e
+
 num_t <- num_a+num_c+num_e
 # multResult <- rep(0,num_a+num_c+num_e+(num_a+1)*num_a/2+(num_c+1)*num_c/2+(num_e+1)*num_e/2+1)
 multResult <- rep(0,num_t+(num_t+1)*num_t/2+1)
@@ -252,6 +256,9 @@ ei_e = as.double(eiv_e),
 var_b_a = as.double(var_b_a),
 var_b_c = as.double(var_b_c),
 var_b_e = as.double(var_b_e),
+beta_a = as.double(beta_a_t),
+beta_c = as.double(beta_c_t),
+beta_e = as.double(beta_e_t),
 D_a = as.integer(D_a),
 D_c = as.integer(D_c),
 D_e = as.integer(D_e),

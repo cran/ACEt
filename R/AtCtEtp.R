@@ -36,6 +36,7 @@ limit <- 12
 limit_e <- 10
 # low_var <- mag/100000
 low_var <- 1e-06
+upp_var <- 100
 var_ran_up <- 3
 var_ran_lo <- 1
 
@@ -269,7 +270,7 @@ if((mod[1]!='d')&(mod[2]!='d')&(mod[3]!='d'))
 			beta_a <- result$par[1:n_a]
 			beta_c <- result$par[(1+n_a):(n_a+n_c)]
 			beta_e <- result$par[(1+n_a+n_c):(n_a+n_c+n_e)]
-			result <- optim(c(var_b_a,var_b_c,var_b_e), loglik_AtCtEt_epsp, gr_AtCtEt_epsp, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, beta_a=beta_a, beta_c=beta_c, beta_e = beta_e, D_a=D_a, D_c=D_c, D_e=D_e, lower = rep(low_var,3), upper = rep(20,3), method = "L-BFGS-B", control=list(maxit = 3000), hessian=TRUE)
+			result <- optim(c(var_b_a,var_b_c,var_b_e), loglik_AtCtEt_epsp, gr_AtCtEt_epsp, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, beta_a=beta_a, beta_c=beta_c, beta_e = beta_e, D_a=D_a, D_c=D_c, D_e=D_e, lower = rep(low_var,3), upper = rep(upp_var,3), method = "L-BFGS-B", control=list(maxit = 3000), hessian=TRUE)
       
 		}else
 		{	
@@ -299,7 +300,7 @@ if((mod[1]!='d')&(mod[2]!='d')&(mod[3]!='d'))
 			betas <- rbind(betas,c(beta_a,beta_c,beta_e))
 
 			low_a <- low_c <- low_e <- low_var
-			upp_a <- upp_c <- upp_e <- 20
+			upp_a <- upp_c <- upp_e <- upp_var
 			if((mod[1]=='l')|(mod[1]=='c'))
 			{low_a <- upp_a <- lower}
 			if((mod[2]=='l')|(mod[2]=='c'))
@@ -353,7 +354,7 @@ if((mod[1]!='d')&(mod[2]!='d')&(mod[3]!='d'))
 	    		beta_a <- result$par[1:n_a]
 	    		beta_c <- result$par[(1+n_a):(n_a+n_c)]
 	    		beta_e <- result$par[(1+n_a+n_c):(n_a+n_c+n_e)]
-	    		result <- optim(c(var_b_a,var_b_c,var_b_e), loglik_AtCtEt_epsp, gr_AtCtEt_epsp, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, beta_a=beta_a, beta_c=beta_c, beta_e = beta_e, D_a=D_a, D_c=D_c, D_e=D_e, lower = rep(low_var,3), upper = rep(20,3), method = "L-BFGS-B", control=list(maxit = 3000), hessian=TRUE)
+	    		result <- optim(c(var_b_a,var_b_c,var_b_e), loglik_AtCtEt_epsp, gr_AtCtEt_epsp, pheno_m = pheno_m, pheno_d = pheno_d, B_des_a_m=B_des_a_m, B_des_a_d=B_des_a_d, B_des_c_m=B_des_c_m, B_des_c_d=B_des_c_d, B_des_e_m=B_des_e_m, B_des_e_d=B_des_e_d, beta_a=beta_a, beta_c=beta_c, beta_e = beta_e, D_a=D_a, D_c=D_c, D_e=D_e, lower = rep(low_var,3), upper = rep(upp_var,3), method = "L-BFGS-B", control=list(maxit = 3000), hessian=TRUE)
       
 	    	}else
 	    	{	
@@ -383,7 +384,7 @@ if((mod[1]!='d')&(mod[2]!='d')&(mod[3]!='d'))
 	    		betas_r <- rbind(betas_r,c(beta_a,beta_c,beta_e))
 
 	    		low_a <- low_c <- low_e <- low_var
-	    		upp_a <- upp_c <- upp_e <- 20
+	    		upp_a <- upp_c <- upp_e <- upp_var
 	    		if((mod[1]=='l')|(mod[1]=='c'))
 	    		{low_a <- upp_a <- lower}
 	    		if((mod[2]=='l')|(mod[2]=='c'))
