@@ -8,7 +8,7 @@ Hypothesis testing of the ACE(t)-p models
 Comparison of different ACE(t)-p models to test a linear or a constant variance component.
 }
 \usage{
-test_acetp(acetp, comp, sim = 100, robust = 0, pe = TRUE)
+test_acetp(acetp, comp, sim = 100, robust = 0, pe = TRUE, verbose = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,7 +17,7 @@ An object from the AtCtEtp function.
 
 }
   \item{comp}{
-The component to test linearity or constant. The variance of this component must be dynamic or linear in the object from the AtCtEtp function. 
+The component for which linearity or constancy is tested. This component must be specified as splines or linear in the AtCtEtp function. 
 }
   \item{sim}{
 The number of the bootstrap resampling for approximating the null distribution when testing linearity.
@@ -28,6 +28,10 @@ An integer indicating the number of different initial values that the function w
 
   \item{pe}{
 A logical argument indicating whether to use penalized spline model to test linearity. The default value is TRUE.
+}
+
+  \item{verbose}{
+A logical argument indicating whether to print testing information and results. The default value is TRUE.
 }
  
 }

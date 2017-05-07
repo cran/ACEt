@@ -1,6 +1,6 @@
-AtCtEt_boot <- function(res, model, data_m, data_d, knot_a, knot_c, knot_e, B=100,alpha=0.05,m=500)
+AtCtEt_boot <- function(res, model, data_m, data_d, knot_a, knot_c, knot_e, loc, B=100,alpha=0.05,m=500)
 {
-spline.main <- sp.spline.estimator(data_m, data_d, model, knot_a, knot_c, knot_e, m)
+spline.main <- sp.spline.estimator(data_m, data_d, model, knot_a, knot_c, knot_e, loc, m)
 spline.boots_a <- matrix(NA,m,B)
 spline.boots_c <- matrix(NA,m,B)
 spline.boots_e <- matrix(NA,m,B)
@@ -71,7 +71,7 @@ for(j in 1:num_d)
 }
 
 
-spline.boots <- sp.spline.estimator(cbind(pheno_mr,data_m[,3]),cbind(pheno_dr, data_d[,3]),model=model, knot_a, knot_c, knot_e, m=m)
+spline.boots <- sp.spline.estimator(cbind(pheno_mr,data_m[,3]),cbind(pheno_dr, data_d[,3]),model=model, knot_a, knot_c, knot_e, loc, m=m)
 spline.boots_a[,i] <- spline.boots$est_a
 spline.boots_c[,i] <- spline.boots$est_c
 spline.boots_e[,i] <- spline.boots$est_e
@@ -101,9 +101,9 @@ return(list(lower.ci_a=cis.lower_a,upper.ci_a=cis.upper_a,lower.ci_c=cis.lower_c
 }
 
 
-sp.spline.estimator <- function(data_m, data_d, model, knot_a, knot_c, knot_e, m) {
+sp.spline.estimator <- function(data_m, data_d, model, knot_a, knot_c, knot_e, loc, m) {
 # Fit spline to data, with cross-validation to pick lambda
-fit <- AtCtEt(data_m, data_d, model, knot_a, knot_c, knot_e)
+fit <- AtCtEt(data_m, data_d, model, knot_a, knot_c, knot_e, loc)
 T_m <- rep(data_m[,3], each=2)
 T_d <- rep(data_d[,3], each=2)
 eval.grid <- seq(from=min(T_m, T_d), to=max(T_m, T_d), length.out=m)

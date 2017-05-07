@@ -56,7 +56,6 @@ plot_AtCtEt <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col, legend)
 	points_e <- exp(bb_e%*%model_cur$beta_e)
 
 	#fisher <- solve(model_cur$hessian[2:(1+l_a+l_c),2:(1+l_a+l_c)])
-	fisher <- solve(model_cur$hessian[n_beta,n_beta])
 	
 	max_v <- max(points_c, points_a, points_e)*1.2
 	plot(range(x), c(0,max_v), type = "n", xlab = xlab, ylab = ylab, main = main)
@@ -81,39 +80,43 @@ plot_AtCtEt <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col, legend)
 	
 	}else{
 	
+	fisher <- solve(model_cur$hessian[n_beta,n_beta])
+	
 	if((l_a>1)|(model_cur$beta_a[1]!=-Inf))
 	{
 	
-	fisher_a <- fisher[index:l_a,index:l_a]
-	lower <- rep(NA, length(x))
-	upper <- rep(NA, length(x))
-	sd <- rep(NA, length(x))
-	flag <- 0
+		fisher_a <- fisher[index:l_a,index:l_a]
+		lower <- rep(NA, length(x))
+		upper <- rep(NA, length(x))
+		sd <- rep(NA, length(x))
+		flag <- 0
 
-	for(i in 1:length(x))
-	{
-		delta <- t(bb_a[i,])%*%fisher_a%*%bb_a[i,]
-		if(delta>=0)
+		for(i in 1:length(x))
 		{
-		sd[i] <- sqrt(delta)
-		lower[i] <- sum(bb_a[i,]*model_cur$beta_a) - 1.96*sd[i]
-		upper[i] <- sum(bb_a[i,]*model_cur$beta_a) + 1.96*sd[i]
-		}else{flag <- 1}
-	}
+			delta <- t(bb_a[i,])%*%fisher_a%*%bb_a[i,]
+			if(delta>=0)
+			{
+			sd[i] <- sqrt(delta)
+			lower[i] <- sum(bb_a[i,]*model_cur$beta_a) - 1.96*sd[i]
+			upper[i] <- sum(bb_a[i,]*model_cur$beta_a) + 1.96*sd[i]
+			}else{flag <- 1}
+		}
 	#if(l_a>1)
 	#{
 		lower <- exp(lower)
 		upper <- exp(upper)
 	#}
-	lower <- ifelse(lower<0, 0, lower)
-	upper <- ifelse(upper>max_v, max_v, upper)
-	index <- index + l_a
-	if(flag == 0)
-	{
-	lines(x, lower, col = "orange" ,lty = 2 , lwd = 0.6)
-	lines(x, upper, col = "orange" ,lty = 2 , lwd = 0.6)
-	polygon(c(x, rev(x)),c(upper, rev(lower)),col='grey',border = NA, lty=3, density=20)
-	}else{warning('The variance of one of the estimates from the Delta method for the A component is negative. Please try the bootstrap method for the confidence interval or use a different model.')}
+		lower <- ifelse(lower<0, 0, lower)
+		upper <- ifelse(upper>max_v, max_v, upper)
+		index <- index + l_a
+		if(flag == 0)
+		{
+			lines(x, lower, col = "orange" ,lty = 2 , lwd = 0.6)
+			lines(x, upper, col = "orange" ,lty = 2 , lwd = 0.6)
+			polygon(c(x, rev(x)),c(upper, rev(lower)),col='grey',border = NA, lty=3, density=20)
+		}else{
+			warning('The variance of one of the estimates from the Delta method for the A component is negative. Please try the bootstrap method for the confidence interval or use a different model.')
+		}
 	}
 	
 	

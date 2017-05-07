@@ -27,7 +27,7 @@ plot_AtCtEt_h <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col)
 		#pheno_d <- c(t(data_d[,1:2]))
 		#T_m <- rep(data_m[,3], each=2)
 		#T_d <- rep(data_d[,3], each=2)
-    n_beta <- 1:(l_a+l_c+l_e)
+		n_beta <- 1:(l_a+l_c+l_e)
 		order <- 3
 		x <- seq(from=model_cur$min_t, to=model_cur$max_t, length.out=500)
 		if(model_cur$n_beta_a>1)
@@ -61,8 +61,7 @@ plot_AtCtEt_h <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col)
 		points_h <- points_a/(points_a+points_c+points_e)	
 
 		#fisher <- solve(model_cur$hessian[2:(1+l_a+l_c),2:(1+l_a+l_c)])
-		fisher <- solve(model_cur$hessian[n_beta,n_beta])
-	
+		
 		max_v <- 1
 		plot(range(x), c(0,max_v), type = "n", xlab = xlab, ylab = ylab, main = main)
 	
@@ -79,8 +78,10 @@ plot_AtCtEt_h <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col)
 			polygon(c(AtCtEt$boot$x, rev(AtCtEt$boot$x)),c(AtCtEt$boot$upper.ci_h, rev(AtCtEt$boot$lower.ci_h)),col='grey',border = NA, lty=3, density=20)
 		
 		}else{
-		  e_a <- rep(0,length(x))
-	    if(model_cur$beta_c[1]!=-Inf)
+			fisher <- solve(model_cur$hessian[n_beta,n_beta])
+	
+		    e_a <- rep(0,length(x))
+			if(model_cur$beta_c[1]!=-Inf)
 			{e_a <- exp(bb_c%*%model_cur$beta_c-bb_a%*%model_cur$beta_a)}
 			e_b <- exp(bb_e%*%model_cur$beta_e-bb_a%*%model_cur$beta_a)
 			lower <- rep(NA, length(x))

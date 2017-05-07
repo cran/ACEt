@@ -9,7 +9,7 @@ The ACE(t) model with the A, C and E variance components as functions with respe
 }
 \usage{
 AtCtEt(data_m, data_d, mod = c('d','d','d'), knot_a = 5, knot_c = 5, knot_e = 5, 
-boot=FALSE, num_b = 100, init = rep(0,3), robust = 0)
+loc = c('e','e','e'), boot=FALSE, num_b = 100, init = rep(0,3), robust = 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -31,6 +31,10 @@ The number of interior knots of the B-spline for the C component, which must be 
 }
   \item{knot_e}{
 The number of interior knots of the B-spline for the E component, which must be no less than 3. The default value is 5.
+}
+
+  \item{loc}{
+	A 1x3 character vector indicating how to place knots for each component: evenly ("e") or quantile-based ("q"). The default value is "e".
 }
 
   \item{boot}{

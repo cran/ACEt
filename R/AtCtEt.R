@@ -1,5 +1,5 @@
 AtCtEt <-
-function(data_m, data_d, mod = c('d','d','d'), knot_a=5, knot_c=5, knot_e=5, boot=FALSE, num_b = 100, init = rep(0,3), robust = 0)
+function(data_m, data_d, mod = c('d','d','d'), knot_a=5, knot_c=5, knot_e=5, loc = c('e','e','e'), boot=FALSE, num_b = 100, init = rep(0,3), robust = 0)
 {
 
 pheno_m <- c(t(data_m[,1:2]))
@@ -23,6 +23,9 @@ if(!(mod[2] %in% c('d','c','n')))
 if(!(mod[3] %in% c('d','c')))
 {stop('The \'mod\' argument for the E component must be \'d\'(dynamic), \'c\'(constant).')}
 
+if((is.vector(loc)==FALSE) | (length(loc)!=3) )
+{stop('The \'loc\' argument must be a vector of length 3.')}
+
 order <- 3
 if(mod[1]=='d')
 {
@@ -36,16 +39,31 @@ if(mod[1]=='d')
 	order <- 1
 }
 #knot <- 8
+min_T <- min(T_m, T_d)
+max_T <- max(T_m, T_d)
+
 if(mod[1]=='d')
 {
-	knots_a <- seq(from=min(T_m, T_d), to=max(T_m, T_d), length.out=knot_a)
-	interval_a <- knots_a[2] - knots_a[1]
-	knots_a <- c(c(min(T_m, T_d)-interval_a*2,min(T_m, T_d)-interval_a), knots_a)
-	knots_a <- c(knots_a, c(max(T_m, T_d)+interval_a,max(T_m, T_d)+interval_a*2))
+	if(loc[1]=='e')
+	{
+		knots_a <- seq(from=min_T, to=max_T, length.out=knot_a)
+		interval_a <- knots_a[2] - knots_a[1]
+		knots_a <- c(c(min_T-interval_a*2,min_T-interval_a), knots_a)
+		knots_a <- c(knots_a, c(max_T+interval_a,max_T+interval_a*2))
+	}else{
+		knots_a <- quantile(unique(T_m,T_d), probs = seq(from=0,to=1,length.out=knot_a))
+		#interval_a <- -1*(knots_a[1] - knots_a[2])
+		#knots_a <- c(c(min_T-interval_a*2,min_T-interval_a), knots_a)
+		knots_a <- c(knots_a[1], knots_a[1], knots_a)
+		#interval_a <- knots_a[knot_a+2] - knots_a[knot_a+1]
+		#knots_a <- c(knots_a, c(max_T+interval_a,max_T+interval_a*2))
+		knots_a <- c(knots_a, knots_a[knot_a+2], knots_a[knot_a+2])
+	}
+	
 	B_des_a_m <- splineDesign(knots_a, x=T_m, ord=order)
 	B_des_a_d <- splineDesign(knots_a, x=T_d, ord=order)
 }else{
-	knots_a <- c(min(T_m, T_d),max(T_m, T_d))
+	knots_a <- c(min_T,max_T)
 	B_des_a_m <- splineDesign(knots_a, x=T_m, ord=order)
 	B_des_a_d <- splineDesign(knots_a, x=T_d, ord=order)
 }
@@ -63,10 +81,22 @@ if(mod[2]=='d')
 }
 if(mod[2]=='d')
 {
-	knots_c <- seq(from=min(T_m, T_d), to=max(T_m, T_d), length.out=knot_c)
-	interval_c <- knots_c[2] - knots_c[1]
-	knots_c <- c(c(min(T_m, T_d)-interval_c*2,min(T_m, T_d)-interval_c), knots_c)
-	knots_c <- c(knots_c, c(max(T_m, T_d)+interval_c,max(T_m, T_d)+interval_c*2))
+	if(loc[2]=='e')
+	{
+		knots_c <- seq(from=min_T, to=max_T, length.out=knot_c)
+		interval_c <- knots_c[2] - knots_c[1]
+		knots_c <- c(c(min_T-interval_c*2,min_T-interval_c), knots_c)
+		knots_c <- c(knots_c, c(max_T+interval_c,max_T+interval_c*2))
+	}else{
+		knots_c <- quantile(unique(T_m,T_d), probs = seq(from=0,to=1,length.out=knot_c))
+		#interval_c <- -1*(knots_a[1] - knots_a[2])
+		#knots_c <- c(c(min_T-interval_c*2,min_T-interval_c), knots_c)
+		knots_c <- c(knots_c[1], knots_c[1], knots_c)
+		#interval_c <- knots_c[knot_c+2] - knots_c[knot_c+1]
+		#knots_c <- c(knots_c, c(max_T+interval_c,max_T+interval_c*2
+		knots_c <- c(knots_c, knots_c[knot_c+2], knots_c[knot_c+2])
+	}
+	
 	B_des_c_m <- splineDesign(knots_c, x=T_m, ord=order)
 	B_des_c_d <- splineDesign(knots_c, x=T_d, ord=order)
 }else{
@@ -88,12 +118,24 @@ if(mod[3]=='d')
 }
 if(mod[3]=='d')
 {
-knots_e <- seq(from=min(T_m, T_d), to=max(T_m, T_d), length.out=knot_e)
-interval_e <- knots_e[2] - knots_e[1]
-knots_e <- c(c(min(T_m, T_d)-interval_e*2,min(T_m, T_d)-interval_e), knots_e)
-knots_e <- c(knots_e, c(max(T_m, T_d)+interval_e,max(T_m, T_d)+interval_e*2))
-B_des_e_m <- splineDesign(knots_e, x=T_m, ord=order)
-B_des_e_d <- splineDesign(knots_e, x=T_d, ord=order)
+	if(loc[3]=='e')
+	{
+		knots_e <- seq(from=min_T, to=max_T, length.out=knot_e)
+		interval_e <- knots_e[2] - knots_e[1]
+		knots_e <- c(c(min_T-interval_e*2,min_T-interval_e), knots_e)
+		knots_e <- c(knots_e, c(max_T+interval_e,max_T+interval_e*2))
+	}else{
+		knots_e <- quantile(unique(T_m,T_d), probs = seq(from=0,to=1,length.out=knot_e))
+		#interval_e <- -1*(knots_a[1] - knots_a[2])
+		#knots_e <- c(c(min_T-interval_e*2,min_T-interval_e), knots_e)
+		knots_e <- c(knots_e[1], knots_e[1], knots_e)
+		#interval_e <- knots_e[knot_e+2] - knots_e[knot_e+1]
+		#knots_e <- c(knots_e, c(max_T+interval_e,max_T+interval_e*2
+		knots_e <- c(knots_e, knots_e[knot_e+2], knots_e[knot_e+2])
+	}
+	
+	B_des_e_m <- splineDesign(knots_e, x=T_m, ord=order)
+	B_des_e_d <- splineDesign(knots_e, x=T_d, ord=order)
 }else{
 knots_e <- c(min(T_m, T_d),max(T_m, T_d))
 B_des_e_m <- splineDesign(knots_e, x=T_m, ord=order)
@@ -204,7 +246,7 @@ if(mod[1]=='n')
 if(mod[2]=='n')
 {res_c <- -Inf}
 
-AtCtEt_model <- list(n_beta_a=n_a, n_beta_c=n_c, n_beta_e=n_e, beta_a=res_a, beta_c=res_c, beta_e=res_e, hessian_ap=result$hessian, hessian=hes_m, con=result$convergence, lik=result$value, knots_a =knots_a, knots_c = knots_c, knots_e = knots_e, min_t = min(T_m, T_d), max_t = max(T_m, T_d), boot = NULL )
+AtCtEt_model <- list(n_beta_a=n_a, n_beta_c=n_c, n_beta_e=n_e, beta_a=res_a, beta_c=res_c, beta_e=res_e, hessian_ap=result$hessian, hessian=hes_m, con=result$convergence, lik=result$value, knots_a =knots_a, knots_c = knots_c, knots_e = knots_e, min_t = min_T, max_t = max_T, boot = NULL )
 
 #if(AtCtEt_model$con!=0)
 #{
@@ -215,7 +257,7 @@ class(AtCtEt_model) <- 'AtCtEt_model'
 
 if(boot==TRUE)
 {
-	boot_res <- AtCtEt_boot(res = AtCtEt_model, mod, data_m, data_d, knot_a, knot_c, knot_e, B=num_b,alpha=0.05,m=500)
+	boot_res <- AtCtEt_boot(res = AtCtEt_model, mod, data_m, data_d, knot_a, knot_c, knot_e, loc, B=num_b,alpha=0.05,m=500)
 	AtCtEt_model$boot <- boot_res
 }
 

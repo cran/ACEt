@@ -1,4 +1,4 @@
-useDynLib(ACEt)
+useDynLib(ACEt, .registration = TRUE)
 export(acetp_mcmc)
 export(AtCtEtp)
 export(AtCtEt)

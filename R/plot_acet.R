@@ -75,9 +75,9 @@ plot_acet <- function(acet, boot = FALSE, heri = FALSE, xlab, ylab, main, col, l
 	{
 		if(heri==FALSE)
 		{
-	    plot_AtCtEtp(acet, xlab=xlab_t, ylab=ylab_t, main=main_t, col=col, legend =legend)
+			plot_AtCtEtp(acet, xlab=xlab_t, ylab=ylab_t, main=main_t, col=col, legend =legend)
 		}else{
-		  plot_AtCtEt_h(acet, boot, xlab=xlab_t, ylab=ylab_t, main=main_t, col=col)
+			plot_AtCtEt_h(acet, boot, xlab=xlab_t, ylab=ylab_t, main=main_t, col=col)
 		}
 	}
 

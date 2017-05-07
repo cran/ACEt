@@ -1,5 +1,5 @@
 test_acetp <-
-function(acetp, comp, sim = 100, robust = 0, pe = TRUE)
+function(acetp, comp, sim = 100, robust = 0, pe = TRUE, verbose = TRUE)
 {
 	if(!(class(acetp) %in% c('AtCtEtp_model')))
 	{
@@ -18,7 +18,11 @@ function(acetp, comp, sim = 100, robust = 0, pe = TRUE)
   
   if(acetp$mod[match(comp,c('a','c','e'))]=='d')
   {
-    
+    if(verbose == TRUE)
+	{
+		cat("Model comparison: \n")
+		print("Log-linear (null) vs. Spline")
+	}
     
 	mod_a <- acetp$mod
 	mod_n <- mod_a
@@ -36,10 +40,10 @@ function(acetp, comp, sim = 100, robust = 0, pe = TRUE)
 	m_a <- AtCtEtp_2(data_m, data_d, knot_a=k_a, knot_c=k_c, knot_e=k_e, mod=mod_a, robust=robust)
 	
 	if(pe==FALSE)
-  {
+	{
       p <- test_acetp_2(m_a, comp)
       return(p)
-  }
+	}
 
 	m_n <- AtCtEtp_2(data_m, data_d, knot_a=k_a, knot_c=k_c, knot_e=k_e, mod=mod_n, robust=robust)
 
@@ -195,6 +199,13 @@ function(acetp, comp, sim = 100, robust = 0, pe = TRUE)
 	p <- sum(llr_sim>llr)/sim
 	test <- list(p = p, llr = llr, llr_sim=llr_sim)
   }else{
+  
+	if(verbose == TRUE)
+	{
+		cat("Model comparison: \n")
+		print("Constancy (null) vs. Log-linear")
+	}
+    
     re <- acetp_mcmc(acetp,iter_num=10000)
     num_v <- 0
     if(sum(acetp$mod=='d')>0)
@@ -270,5 +281,12 @@ function(acetp, comp, sim = 100, robust = 0, pe = TRUE)
     p <- pchisq((beta_t[1]-beta_t[2])^2/sigma,1,lower.tail=FALSE)
     test <- list(p = p, chisq = (beta_t[1]-beta_t[2])^2/sigma)
   }
-	return(test)
+  
+	if(verbose == TRUE)
+	{
+		return(test)
+	}else{
+		return(invisible(test))
+	}
+	
 }
