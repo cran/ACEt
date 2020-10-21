@@ -39,7 +39,10 @@ RcppExport SEXP loglik_AtCtEt_esp_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_m, 
 	arma::mat k_m(2,2);
 	arma::mat k_d(2,2);
 	arma::mat k_d_a(2,2);
-	k_d_a << 1 << 0.5 << arma::endr << 0.5 << 1 << arma::endr;
+	// k_d_a << 1 << 0.5 << arma::endr << 0.5 << 1 << arma::endr;
+	k_d_a.fill(0.5);
+	k_d_a(0,0) = 1;
+	k_d_a(1,1) = 1;
 	arma::vec  v = arma::ones<arma::vec>(2);
 	arma::mat diag = arma::diagmat(v);
 	
@@ -152,7 +155,10 @@ RcppExport SEXP gr_AtCtEt_esp_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_m, SEXP
 	arma::mat k_m(2,2);
 	arma::mat k_d(2,2);
 	arma::mat k_d_a(2,2);
-	k_d_a << 1 << 0.5 << arma::endr << 0.5 << 1 << arma::endr;
+	// k_d_a << 1 << 0.5 << arma::endr << 0.5 << 1 << arma::endr;
+	k_d_a.fill(0.5);
+	k_d_a(0,0) = 1;
+	k_d_a(1,1) = 1;
 	arma::vec  v = arma::ones<arma::vec>(2);
 	arma::mat diag = arma::diagmat(v);
 	
@@ -337,7 +343,10 @@ RcppExport SEXP hessian_AtCtEt_esp_c(SEXP b_a, SEXP b_c, SEXP b_e, SEXP pheno_m,
 	arma::mat k_1d(2,2);
 	arma::mat k_2d(2,2);
 	arma::mat k_3d(2,2);
-	k_1d << 0.5 << 0 << arma::endr << 0 << 0.5 << arma::endr;
+	// k_1d << 0.5 << 0 << arma::endr << 0 << 0.5 << arma::endr;
+	k_1d.zeros();
+	k_1d(0,0) = 0.5;
+	k_1d(1,1) = 0.5;
 	arma::vec  v = arma::ones<arma::vec>(2);
 	arma::mat diag = arma::diagmat(v);
 	

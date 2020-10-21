@@ -67,6 +67,8 @@ When the 'mod' argument for a component is 'c'(constant), the corresponding 'bet
 
 \references{
 He, L., Sillanpää, M.J., Silventoinen, K., Kaprio, J. and Pitkäniemi, J., 2016. Estimating Modifying Effect of Age on Genetic and Environmental Variance Components in Twin Models. Genetics, 202(4), pp.1313-1328.
+
+He, L., Pitkäniemi, J., Silventoinen, K. and Sillanpää, M.J., 2017. ACEt: An R package for estimating dynamic heritability and comparing twin models. Behavior Genetics, 47(6), pp.620-641.
 }
 
 \author{
@@ -83,5 +85,4 @@ Liang He
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+

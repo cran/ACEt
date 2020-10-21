@@ -1,4 +1,4 @@
-﻿\name{ACEt-package}
+\name{ACEt-package}
 \alias{ACEt-package}
 \alias{ACEt}
 \docType{package}
@@ -25,6 +25,8 @@ Maintainer: Liang He <lianghe@mit.edu>
 }
 \references{
 He, L., Sillanpää, M.J., Silventoinen, K., Kaprio, J. and Pitkäniemi, J., 2016. Estimating Modifying Effect of Age on Genetic and Environmental Variance Components in Twin Models. Genetics, 202(4), pp.1313-1328.
+
+He, L., Pitkäniemi, J., Silventoinen, K. and Sillanpää, M.J., 2017. ACEt: An R package for estimating dynamic heritability and comparing twin models. Behavior Genetics, 47(6), pp.620-641.
 }
 \keyword{ package }
 
