@@ -12,7 +12,8 @@ acetp_mcmc <- function(acetp, iter_num = 10000, sd = 0.1, burnin =1000)
 	}
 
 
-	if(class(acetp)=='AtCtEtp_model')
+	# if(class(acetp)=='AtCtEtp_model')
+  if(is(acetp,'AtCtEtp_model'))
 	{
 		res <- AtCtEtp_mcmc(acetp, iter_num, sd, burnin)
 		return(res)
@@ -33,10 +34,11 @@ AtCtEtp_mcmc <-
 function(AtCtEtp, iter_num = 10000, sd = 0.1, burnin =1000)
 {
 
-if(class(AtCtEtp)!='AtCtEtp_model')
-{
-	stop('The first parameter must be an object obtained from the AtCtEtp function.')
-}
+# if(class(AtCtEtp)!='AtCtEtp_model')
+  if(!is(AtCtEtp,'AtCtEtp_model'))
+  {
+  	stop('The first parameter must be an object obtained from the AtCtEtp function.')
+  }
 
 T_m <- AtCtEtp$T_m
 num_m <- length(T_m)
@@ -121,7 +123,8 @@ return(AtCtEtp_mc_mod)
 acetp_mcmc_2 <- function(AtCtEtp, iter_num = 5000, sd = 0.1, burnin =500)
   {
     
-    if(class(AtCtEtp)!='AtCtEtp_model')
+    # if(class(AtCtEtp)!='AtCtEtp_model')
+    if(!is(AtCtEtp,'AtCtEtp_model'))
     {
       stop('The first parameter must be an object obtained from the AtCtEtp function.')
     }

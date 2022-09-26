@@ -12,15 +12,15 @@ The package implements two novel twin models that are able to estimate dynamic b
 \tabular{ll}{
 Package: \tab ACEt\cr
 Type: \tab Package\cr
-Version: \tab 1.8.0\cr
-Date: \tab 2017-04-29\cr
+Version: \tab 1.8.2\cr
+Date: \tab 2022-09-23\cr
 License: \tab GPL \cr
 }
 }
 \author{
 Liang He
 
-Maintainer: Liang He <lianghe@mit.edu>
+Maintainer: Liang He <lianghe@health.sdu.dk>
 
 }
 \references{

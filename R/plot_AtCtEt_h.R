@@ -1,11 +1,13 @@
 plot_AtCtEt_h <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col)
 {
-	if((class(AtCtEt)!='AtCtEt_model')&(class(AtCtEt)!='AtCtEtp_mc_model'))
+	# if((class(AtCtEt)!='AtCtEt_model')&(class(AtCtEt)!='AtCtEtp_mc_model'))
+  if(!(class(AtCtEt)%in%c('AtCtEt_model','AtCtEtp_mc_model')))
 	{
 		stop('The first parameter must be an object obtained from the AtCtEt or acetp_mcmc function.')
 	}
 
-	if((boot==TRUE)&(class(AtCtEt)=='AtCtEt_model'))
+	# if((boot==TRUE)&(class(AtCtEt)=='AtCtEt_model'))
+  if((boot==TRUE)&(is(AtCtEt,'AtCtEt_model')))
 	{
 		if(is.null(AtCtEt$boot)==TRUE)
 		{
@@ -13,7 +15,8 @@ plot_AtCtEt_h <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col)
 		}
 	}
 	
-	if(class(AtCtEt)=='AtCtEt_model')
+	# if(class(AtCtEt)=='AtCtEt_model')
+  if(is(AtCtEt,'AtCtEt_model'))
 	{
 		model_cur <- AtCtEt
 

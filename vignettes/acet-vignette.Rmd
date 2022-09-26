@@ -1,0 +1,146 @@
+---
+title: 'ACEt: An R package for estimating dynamic heritability and twin model comparison'
+author: "Liang He"
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    toc: yes
+    fig_caption: yes
+  md_document:
+    toc: yes  
+bibliography: bibliography.bib
+vignette: |
+  %\VignetteIndexEntry{acet} 
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown} 
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# ACEt v1.8.2
+
+## Installation
+
+The R package can be installed from CRAN
+```{r,eval=FALSE}
+install.packages("ACEt")
+```
+
+The installation requires *Rcpp-0.11.1* and has been tested on *R-4.1.3*. The installation of the *ACEt* package also requires installing the *BH* and *RcppArmadillo* packages. 
+
+Please contact lianghe@health.sdu.dk for more information.
+
+### Most recent version
+
+To install the latest version from github:
+```{r,eval=FALSE}
+install.packages("devtools")
+library(devtools)
+install_github("lhe17/ACEt")
+```
+
+## Application to an example dataset
+
+We illustrate how to utilize the *ACEt* R package with an example dataset that can be loaded with the following codes. More detail about the method is given in @he2016estimating and @He2019ACEtA.  
+```{r}
+library(ACEt)
+data(data_ace)
+
+```
+The example dataset contains two matrices ```mz``` and ```dz``` for MZ and DZ twins, respectively. Each matrix includes 2500 twin pairs, of which the first two columns are the quantitative phenotype of the twin pair and the third column (```T_m``` or ```T_d```) is age.
+```{r}
+attributes(data_ace)
+head(data_ace$mz)
+head(data_ace$dz)
+```
+The age is distributed uniformly from 1 to 50 in both twin datasets and the phenotypes are normally distributed with a mean equal to zero. As discussed in @He2019ACEtA, before used as an input for this package, the phenotype should be centered, for example, by using residuals from a linear regression model ```lm()``` in which covariates for the mean function can be included. 
+Fitting an ACE(t) model can be done by calling the ```AtCtEt``` function, in which users can specify a function (null, constant or splines) for each component independently through the ```mod``` argument.
+```{r}
+# fitting the ACE(t) model
+re <- AtCtEt(data_ace$mz, data_ace$dz, mod = c('d','d','c'), knot_a = 6, knot_c = 4)
+summary(re)
+```
+In the above script, an ACE(t) model is fitted for the example dataset. The first two arguments specify the matrices of the phenotypes for MZ and DZ twins, respectively. The argument ```mod = c('d','d','c')``` specifies that we allow the variances of the A and C components to change dynamically and assume the variance of the E component to be a constant over age. The  ```mod``` argument is a vector of three elements corresponding to the A, C and E components that can be ```'d', 'c' or 'n'```, in which ```'n'``` represents the exclusion of a component. For example, ```mod = c('d','n','c')``` indicates that we fit an AE model with a dynamic A component and a constant E component. It should be noted that the E component cannot be eliminated. We can also give the number of knots for each component, which is ignored if we choose ```'c'``` or ```'n'``` for that component. The number of randomly generated initial values for the estimation algorithm can be specified using the ```robust``` argument. Multiple initial values can be attempted to minimize the risk of missing the global maximum. The ```AtCtEt``` function returns both analytical and approximated Hessian matrices (shown below), which are close to each other in general and can be used to compute pointwise CIs. Note that the analytical Hessian is always positive definite, but the approximated one is not necessarily positive definite. The returned value ```lik``` is the negative log-likelihood that can be used for LRT for the comparison of twin models.
+```{r}
+# part of the analytical Hessian matrix
+re$hessian[1:8,1:8]
+# part the Hessian matrix approximated by the L-BFGS algorithm
+re$hessian_ap[1:8,1:8]
+```
+The ```AtCtEt``` function returns the minus log-likelihood evaluated at the estimates that is needed to make inference based on LRT. For example, the following program tests whether the A or C component has a constant variance with respect to age, we fit the null models and calculate the p-values based on $\chi^2$ distributions. It can be seen that the LRT has no sufficient statistical power to reject the constancy of the C component with this sample size (```p1>0.05```). In addition, we test whether the C component can be ignored by comparing ```re_cc``` and ```re_cn``` and compute the p-value (```p3```) based on a mixture of $\chi^2$ distributions.  
+```{r}
+re_cc <- AtCtEt(data_ace$mz, data_ace$dz, mod = c('d','c','c'), knot_a = 6, knot_c = 4)
+p1 <- pchisq(2*(re_cc$lik-re$lik), 4, lower.tail=FALSE)
+p1
+re_ac <- AtCtEt(data_ace$mz, data_ace$dz, mod = c('c','d','c'), knot_a = 6, knot_c = 4)
+p2 <- pchisq(2*(re_ac$lik-re$lik), 6, lower.tail=FALSE)
+p2
+re_cn <- AtCtEt(data_ace$mz, data_ace$dz, mod = c('d','n','c'), knot_a = 6, knot_c = 4)
+p3 <- 0.5*pchisq(2*(re_cn$lik-re_cc$lik), 1, lower.tail=FALSE)
+p3
+```
+
+After fitting the ACE(t) model, we can plot the estimated variance curves by calling the ```plot_acet``` function.
+```{r}
+plot_acet(re, ylab='Var', xlab='Age (1-50)')
+```
+
+By default, the 95% pointwise CIs are estimated using the delta method. Alternatively, we can choose the bootstrap method by setting ```boot=TRUE``` and giving the number of bootstrap resampling, the default value of which is 100. 
+```{r}
+## fitting an ACE(t) model with the CIs esitmated by the bootstrap method 
+re_b <- AtCtEt(data_ace$mz, data_ace$dz, mod = c('d','d','c'), knot_a = 6, knot_c = 4, boot = TRUE, 
+               num_b = 60)
+plot_acet(re_b, boot = TRUE)
+```
+
+Next, we plot the age-specific heritability by setting the argument ```heri=TRUE``` in the ```plot_acet``` function. And similarly we can choose either the delta method or the bootstrap method to generate the CIs.
+```{r}
+## plot dynamic heritability with the CIs using the delta method 
+plot_acet(re_b, heri=TRUE, boot = FALSE)
+## plot dynamic heritability with the CIs using the bootstrap method 
+plot_acet(re_b, heri=TRUE, boot = TRUE)
+```
+
+The ACE(t)-p model is implemented in the ```AtCtEtp``` function, in which users can choose exponential of penalized splines, a linear function or a constant to model a certain component by setting the ```mod``` argument. Compared to the ACE(t) model, it is not an essential problem to provide an excessive number of knots (the default value of interior knots is 8) when using the ACE(t)-p model as it is more important to ensure adequate knots for curves with more fluctuation than to avoid overfitting. Below, we fit the example dataset using the ```AtCtEtp``` function in which the A and C components are modelled by B-splines of 8 interior knots and the E component by a log-linear function. Similar to the ```AtCtEt``` function, we can use the ```robust``` argument to specify the number of randomly generated initial values, which can reduce the program's possibility of being stuck on a local maximum in the EM algorithm. 
+```{r}
+## fitting an ACE(t)-p model
+re <- AtCtEtp(data_ace$mz, data_ace$dz, knot_a = 8, knot_c = 8, mod=c('d','d','l'))
+summary(re)
+```
+The ```AtCtEtp``` function finds MLE of the variance $\sigma^{2}_{\beta^{A,C,E}}$ using the integrated likelihood and also provides estimates of the spline coefficients, i.e. $\beta^{A,C,E}$, which are based on maximum a posteriori (MAP) estimation. For a variance component of log-linearity (the E component in this example), $\beta$ is a vector of two elements that $exp(\beta)$ are the variances of this component at the minimum and maximum age in the dataset. To obtain the empirical Bayes estimates of $\beta^{A,C,E}$ and the covariance matrix using the MCMC method, we then call the ```acetp_mcmc``` function by plugging the result from the ```AtCtEtp``` function. We can also specify the numbers of the MCMC iterations and burn-in.      
+
+```{r}
+re_mcmc <- acetp_mcmc(re, iter_num = 5000, burnin = 500)
+summary(re_mcmc)
+```
+Given the esimates together with their covariance matrix, we can plot the variance curves or dynamic heritability by calling the ```plot_acet``` function. The ```boot``` option is ignored for the ACE(t)-p model.
+```{r}
+plot_acet(re_mcmc)
+plot_acet(re_mcmc, heri=TRUE)
+```
+
+Assigning too many knots in the ACE(t)-p model is much less harmful than that in the ACE(t) model. Comparing the following two plots from the application of the two models with 10 knots for each component to the example data set, it suggests that the ACE(t) model has an overfitting problem but the ACE(t)-p model works properly.
+
+```{r knot_10, echo=FALSE, fig.cap="Plots of variance curves of the example data set fitted by the ACE(t) and ACE(t)-p model with 10 interior knots for each component. Left: the ACE(t) model. Right: the ACE(t)-p model."}
+knitr::include_graphics("knot_10.jpg")
+```
+
+Finally, we give an example to test a linear or constant variance curve. The ```test_acetp``` function is dedicated to the model comparison for the ACE(t)-p model and returns a p-value from LRT using a resampling method for testing log-linearity or from a $\chi^2$ distribution for testing constancy. First, the following code tests whether the E component is invariant with age. Before testing, we need to fit the data using the ```AtCtEtp``` function and obtain an ```AtCtEtp_model``` object ```re```. Note that when testing a constant component, the component must be specified as log-linear when fitting the model (as shown above). 
+```{r}
+test <- test_acetp(re, comp = 'e')
+test$p
+
+```
+The result suggests that the E component is time-invariant as the p-value is larger than 0.05. Next, we test whether a log-linear model would be fitted better for the C component. 
+```{r,eval=FALSE}
+test <- test_acetp(re, comp = 'c', sim = 100, robust = 0)
+test$p
+```
+The result (p>0.05) shows that the null hypothesis of the log-linearity is not rejected.
+
+## Reference

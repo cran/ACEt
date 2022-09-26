@@ -55,7 +55,8 @@ plot_acet <- function(acet, boot = FALSE, heri = FALSE, xlab, ylab, main, col, l
     }
   }
 
-	if(class(acet)=='AtCtEt_model')
+	# if(class(acet)=='AtCtEt_model')
+  if(is(acet,'AtCtEt_model'))
 	{
 		if(heri == FALSE)
 		{
@@ -65,13 +66,9 @@ plot_acet <- function(acet, boot = FALSE, heri = FALSE, xlab, ylab, main, col, l
 		}
 	}
 	
-	
-	#if(class(acet)=='AtCtEp_mc_model')
-	#{
-	#	plot_AtCtEp(acet)
-	#}
 
-	if(class(acet)=='AtCtEtp_mc_model')
+	# if(class(acet)=='AtCtEtp_mc_model')
+  if(is(acet,'AtCtEtp_mc_model'))
 	{
 		if(heri==FALSE)
 		{
@@ -81,9 +78,5 @@ plot_acet <- function(acet, boot = FALSE, heri = FALSE, xlab, ylab, main, col, l
 		}
 	}
 
-	#if(class(acet)=='AtEtp_mc_model')
-	#{
-	#	plot_AtEtp(acet)
-	#}
 
 }

@@ -79,10 +79,8 @@ RcppExport SEXP loglik_AtEt_epsp_c(SEXP v_b_a, SEXP v_b_e, SEXP pheno_m, SEXP ph
 		double be_m = exp(as_scalar(b_e_m.row(start)*be));
 		arma::mat V_m = be_m*diag + ba_m*k_m;
 		arma::mat inv_V_m = inv(V_m);
-		arma::vec p_m_v(2);
-		arma::rowvec p_m_r(2);
-		p_m_v << p_m[start] << p_m[end];
-		p_m_r << p_m[start] << p_m[end];
+		arma::vec p_m_v({p_m[start], p_m[end]});
+		arma::rowvec p_m_r({p_m[start], p_m[end]});
 		arma::mat temp = p_m_r*inv_V_m*p_m_v;
 		YSY_m = YSY_m + as_scalar(temp);
 		D_m = D_m + log(V_m(0,0)*V_m(0,0)-V_m(0,1)*V_m(0,1));
@@ -106,10 +104,8 @@ RcppExport SEXP loglik_AtEt_epsp_c(SEXP v_b_a, SEXP v_b_e, SEXP pheno_m, SEXP ph
 		double be2_d = be_d*be_d;
 		arma::mat V_d = be_d*diag + ba_d*(k_1d+k_2d);
 		arma::mat inv_V_d = inv(V_d);
-		arma::vec p_d_v(2);
-		arma::rowvec p_d_r(2);
-		p_d_v << p_d[start] << p_d[end];
-		p_d_r << p_d[start] << p_d[end];
+		arma::vec p_d_v({p_d[start], p_d[end]});
+		arma::rowvec p_d_r({p_d[start], p_d[end]});
 		arma::mat temp = p_d_r*inv_V_d*p_d_v;
 		YSY_d = YSY_d + as_scalar(temp);
 		D_d = D_d + log(V_d(0,0)*V_d(0,0)-V_d(0,1)*V_d(0,1));
@@ -246,10 +242,8 @@ RcppExport SEXP loglik_AtEt_epsp_g_c(SEXP b_a, SEXP b_e, SEXP pheno_m, SEXP phen
 		arma::mat inv_V_m = V_m/det_m;
 		inv_V_m(0,1) = (-1)*inv_V_m(0,1);
 		inv_V_m(1,0) = inv_V_m(0,1);
-		arma::vec p_m_v(2);
-		arma::rowvec p_m_r(2);
-		p_m_v << p_m[start] << p_m[end];
-		p_m_r << p_m[start] << p_m[end];
+		arma::vec p_m_v({p_m[start], p_m[end]});
+		arma::rowvec p_m_r({p_m[start], p_m[end]});
 		arma::mat temp = p_m_r*inv_V_m*p_m_v;
 		YSY_m = YSY_m + as_scalar(temp);
 		D_m = D_m + log(det_m);
@@ -267,10 +261,8 @@ RcppExport SEXP loglik_AtEt_epsp_g_c(SEXP b_a, SEXP b_e, SEXP pheno_m, SEXP phen
 		inv_V_d = V_d/det_d;
 		inv_V_d(0,1) = (-1)*inv_V_d(0,1);
 		inv_V_d(1,0) = inv_V_d(0,1);
-		arma::vec p_d_v(2);
-		arma::rowvec p_d_r(2);
-		p_d_v << p_d[start] << p_d[end];
-		p_d_r << p_d[start] << p_d[end];
+		arma::vec p_d_v({p_d[start], p_d[end]});
+		arma::rowvec p_d_r({p_d[start], p_d[end]});
 		arma::mat temp = p_d_r*inv_V_d*p_d_v;
 		YSY_d = YSY_d + as_scalar(temp);
 		D_d = D_d + log(det_d);
@@ -332,10 +324,8 @@ RcppExport SEXP gr_AtEt_epsp_g_c(SEXP b_a, SEXP b_e, SEXP pheno_m, SEXP pheno_d,
 		double be_m = exp(as_scalar(b_e_m.row(start)*be));
 		arma::mat V_m = ba_m*k_m + be_m*diag;
 		arma::mat inv_V_m = inv(V_m);
-		arma::vec p_m_v(2);
-		arma::rowvec p_m_r(2);
-		p_m_v << p_m[start] << p_m[end];
-		p_m_r << p_m[start] << p_m[end];
+		arma::vec p_m_v({p_m[start], p_m[end]});
+		arma::rowvec p_m_r({p_m[start], p_m[end]});
 		arma::mat inv_ph_m = inv_V_m*p_m_v;
 		arma::mat ph_inv_m = p_m_r*inv_V_m;
 		arma::mat temp_prod = inv_V_m*k_m;
@@ -362,10 +352,8 @@ RcppExport SEXP gr_AtEt_epsp_g_c(SEXP b_a, SEXP b_e, SEXP pheno_m, SEXP pheno_d,
 		double be_d = exp(as_scalar(b_e_d.row(start)*be));
 		arma::mat V_d = ba_d*(k_1d+k_2d) + be_d*diag;
 		arma::mat inv_V_d = inv(V_d);
-		arma::vec p_d_v(2);
-		arma::rowvec p_d_r(2);
-		p_d_v << p_d[start] << p_d[end];
-		p_d_r << p_d[start] << p_d[end];
+		arma::vec p_d_v({p_d[start], p_d[end]});
+		arma::rowvec p_d_r({p_d[start], p_d[end]});
 		arma::mat inv_ph_d = inv_V_d*p_d_v;
 		arma::mat ph_inv_d = p_d_r*inv_V_d;
 		arma::mat temp_prod = inv_V_d*(k_1d+k_2d);
@@ -463,10 +451,8 @@ RcppExport SEXP gr_AtEt_epsp_c(SEXP v_b_a, SEXP v_b_e, SEXP pheno_m, SEXP pheno_
 		double bae_m = ba_m*be_m;
 		arma::mat V_m = be_m*diag + ba_m*k_m;
 		arma::mat inv_V_m = inv(V_m);
-		arma::vec p_m_v(2);
-		arma::rowvec p_m_r(2);
-		p_m_v << p_m[start] << p_m[end];
-		p_m_r << p_m[start] << p_m[end];
+		arma::vec p_m_v({p_m[start], p_m[end]});
+		arma::rowvec p_m_r({p_m[start], p_m[end]});
 		arma::mat inv_ph_m = inv_V_m*p_m_v;
 		arma::mat ph_inv_m = p_m_r*inv_V_m;
 		
@@ -489,10 +475,8 @@ RcppExport SEXP gr_AtEt_epsp_c(SEXP v_b_a, SEXP v_b_e, SEXP pheno_m, SEXP pheno_
 		double bae_d = ba_d*be_d;
 		arma::mat V_d = be_d*diag + ba_d*(k_1d+k_2d);
 		arma::mat inv_V_d = inv(V_d);
-		arma::vec p_d_v(2);
-		arma::rowvec p_d_r(2);
-		p_d_v << p_d[start] << p_d[end];
-		p_d_r << p_d[start] << p_d[end];
+		arma::vec p_d_v({p_d[start], p_d[end]});
+		arma::rowvec p_d_r({p_d[start], p_d[end]});
 		arma::mat inv_ph_d = inv_V_d*p_d_v;
 		arma::mat ph_inv_d = p_d_r*inv_V_d;
 		

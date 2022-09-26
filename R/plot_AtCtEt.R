@@ -1,6 +1,7 @@
 plot_AtCtEt <- function(AtCtEt, boot=FALSE, xlab, ylab, main, col, legend)
 {
-	if(class(AtCtEt)!='AtCtEt_model')
+	# if(class(AtCtEt)!='AtCtEt_model')
+  if(!is(AtCtEt,'AtCtEt_model'))
 	{
 		stop('The first parameter must be an object obtained from the AtCtEt function.')
 	}

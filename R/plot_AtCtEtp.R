@@ -1,6 +1,7 @@
 plot_AtCtEtp <- function(AtCtEtp_mcmc, xlab, ylab, main, col, legend)
 {
-	if(class(AtCtEtp_mcmc)!='AtCtEtp_mc_model')
+	#if(class(AtCtEtp_mcmc)!='AtCtEtp_mc_model')
+  if(!is(AtCtEtp_mcmc,'AtCtEtp_mc_model'))
 	{
 		stop('The first parameter must be an object obtained from the acetp_mcmc function.')
 	}
