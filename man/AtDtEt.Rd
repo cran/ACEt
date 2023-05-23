@@ -1,14 +1,14 @@
-\name{AtCtEt}
-\alias{AtCtEt}
+\name{AtDtEt}
+\alias{AtDtEt}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Fitting the ACE(t) model  
+Fitting the ADE(t) model  
 }
 \description{
-The ACE(t) model with the A, C and E variance components as functions with respect to age modelled by B-splines.
+The ADE(t) model with the A, D and E variance components as functions with respect to age modelled by B-splines.
 }
 \usage{
-AtCtEt(data_m, data_d, mod = c('d','d','d'), knot_a = 5, knot_c = 5, knot_e = 5, 
+AtDtEt(data_m, data_d, mod = c('d','d','d'), knot_a = 5, knot_d = 5, knot_e = 5, 
 loc = c('e','e','e'), boot=FALSE, num_b = 100, init = rep(0,3), robust = 0)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -20,14 +20,14 @@ An \eqn{N_m} x 3 data matrix for MZ twins. \eqn{N_m} is the number of MZ twin pa
 An \eqn{N_d} x 3 data matrix for DZ twins. \eqn{N_d} is the number of DZ twin pairs. The first two columns are centered trait values (i.e. the mean should be zero) and the third column is age (or other covariates). 
 }
   \item{mod}{
-  A character vector of length 3. Each element specifies the function for the A, C or E component respectively. The A and C components can be 'd'(dynamic), 'c'(constant) or 'n'(NA). The E component can only be 'd' or 'c'. Thus, \eqn{model=c('c','c','c')} is corresponding to the classical ACE model.
+  A character vector of length 3. Each element specifies the function for the A, D or E component respectively. The A and D components can be 'd'(dynamic), 'c'(constant) or 'n'(NA). The E component can only be 'd' or 'c'. Thus, \eqn{model=c('c','c','c')} is corresponding to the classical ADE model.
   }
   \item{knot_a}{
 The number of interior knots of the B-spline for the A component, which must be no less than 3. The default value is 5. 
 }
 
-  \item{knot_c}{
-The number of interior knots of the B-spline for the C component, which must be no less than 3. The default value is 5.
+  \item{knot_d}{
+The number of interior knots of the B-spline for the D component, which must be no less than 3. The default value is 5.
 }
   \item{knot_e}{
 The number of interior knots of the B-spline for the E component, which must be no less than 3. The default value is 5.
@@ -59,17 +59,17 @@ An integer indicating the number of different initial values that the function w
 %%  ~Describe the value returned
 %%  If it is a LIST, use
   \item{n_beta_a }{The number of spline coefficients for the A component.}
-  \item{n_beta_c }{The number of spline coefficients for the C component.}
+  \item{n_beta_d }{The number of spline coefficients for the D component.}
   \item{n_beta_e }{The number of spline coefficients for the E component.}
   \item{beta_a }{The estimated spline coefficients (if the model parameter is 'd') or variance (if the model parameter is 'c') of the A component.}
-  \item{beta_c }{The estimated spline coefficients (if the model parameter is 'd') or variance (if the model parameter is 'c') of the C component.}
+  \item{beta_d }{The estimated spline coefficients (if the model parameter is 'd') or variance (if the model parameter is 'c') of the D component.}
   \item{beta_e }{The estimated spline coefficients (if the model parameter is 'd') or variance (if the model parameter is 'c') of the E component.}
   \item{hessian_ap }{The approximate numerical observed information matrix from the quasi-Newton algorithm.}
   \item{hessian }{The expected information matrix calculated analytically.}
   \item{con }{An indicator of convergence of the optimization algorithm. An integer code 0 indicates successful completion. See 'optim' for more details.}
   \item{lik }{The minus log-likelihood.}
   \item{knots_a }{A vector of the knot positions for the A component.}
-  \item{knots_c }{A vector of the knot positions for the C component.}
+  \item{knots_d }{A vector of the knot positions for the D component.}
   \item{knots_e }{A vector of the knot positions for the E component.}
   \item{boot }{A list containing pointwise CIs estimated from the bootstrap method when \eqn{boot=TRUE}}
 %% ...
@@ -97,7 +97,7 @@ Liang He
 \examples{
 data(data_ace)
 
-result <- AtCtEt(data_ace$mz, data_ace$dz, mod=c('d','d','c'))
+result <- AtDtEt(data_ace$mz, data_ace$dz, mod=c('d','d','c'))
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

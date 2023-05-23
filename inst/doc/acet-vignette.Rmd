@@ -10,7 +10,7 @@ output:
     toc: yes  
 bibliography: bibliography.bib
 vignette: |
-  %\VignetteIndexEntry{acet} 
+  %\VignetteIndexEntry{User guide for ACEt} 
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown} 
 ---
@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# ACEt v1.8.2
+# ACEt v1.9.0
 
 ## Installation
 
@@ -33,7 +33,7 @@ install.packages("ACEt")
 
 The installation requires *Rcpp-0.11.1* and has been tested on *R-4.1.3*. The installation of the *ACEt* package also requires installing the *BH* and *RcppArmadillo* packages. 
 
-Please contact lianghe@health.sdu.dk for more information.
+Please contact hyx520101@gmail.com for more information.
 
 ### Most recent version
 
@@ -59,17 +59,17 @@ head(data_ace$mz)
 head(data_ace$dz)
 ```
 The age is distributed uniformly from 1 to 50 in both twin datasets and the phenotypes are normally distributed with a mean equal to zero. As discussed in @He2019ACEtA, before used as an input for this package, the phenotype should be centered, for example, by using residuals from a linear regression model ```lm()``` in which covariates for the mean function can be included. 
-Fitting an ACE(t) model can be done by calling the ```AtCtEt``` function, in which users can specify a function (null, constant or splines) for each component independently through the ```mod``` argument.
+Fitting an ACE(t) model can be done by calling the ```AtCtEt``` function, in which users can specify a function (null, constant or splines) for each of the A, C, and E components independently through the ```mod``` argument.
 ```{r}
 # fitting the ACE(t) model
 re <- AtCtEt(data_ace$mz, data_ace$dz, mod = c('d','d','c'), knot_a = 6, knot_c = 4)
 summary(re)
 ```
-In the above script, an ACE(t) model is fitted for the example dataset. The first two arguments specify the matrices of the phenotypes for MZ and DZ twins, respectively. The argument ```mod = c('d','d','c')``` specifies that we allow the variances of the A and C components to change dynamically and assume the variance of the E component to be a constant over age. The  ```mod``` argument is a vector of three elements corresponding to the A, C and E components that can be ```'d', 'c' or 'n'```, in which ```'n'``` represents the exclusion of a component. For example, ```mod = c('d','n','c')``` indicates that we fit an AE model with a dynamic A component and a constant E component. It should be noted that the E component cannot be eliminated. We can also give the number of knots for each component, which is ignored if we choose ```'c'``` or ```'n'``` for that component. The number of randomly generated initial values for the estimation algorithm can be specified using the ```robust``` argument. Multiple initial values can be attempted to minimize the risk of missing the global maximum. The ```AtCtEt``` function returns both analytical and approximated Hessian matrices (shown below), which are close to each other in general and can be used to compute pointwise CIs. Note that the analytical Hessian is always positive definite, but the approximated one is not necessarily positive definite. The returned value ```lik``` is the negative log-likelihood that can be used for LRT for the comparison of twin models.
+In the above script, an ACE(t) model is fitted for the example dataset. The first two arguments specify the matrices of the phenotypes for MZ and DZ twins, respectively. The argument ```mod = c('d','d','c')``` specifies that we allow the variances of the A and C components to change dynamically and assume the variance of the E component to be a constant over age. The  ```mod``` argument is a vector of three elements corresponding to the A, C and E components that can be ```'d', 'c' or 'n'```, in which ```'n'``` represents the exclusion of a component. For example, ```mod = c('d','n','c')``` indicates that we fit an AE model with a dynamic A component and a constant E component. It should be noted that the E component cannot be eliminated. We can also give the number of knots for each component, which is ignored if we choose ```'c'``` or ```'n'``` for that component. The number of randomly generated initial values for the estimation algorithm can be specified using the ```robust``` argument. Multiple initial values can be attempted to minimize the risk of missing the global maximum. The ```AtCtEt``` function returns both an expected and an approximate observed Fisher information matrices (shown below), which are close to each other in general and can be used to compute pointwise CIs. Note that the expected information matrix is always positive (semi)definite, but the approximated one is not necessarily positive definite. The returned value ```lik``` is the negative log-likelihood that can be used for LRT for the comparison of twin models.
 ```{r}
-# part of the analytical Hessian matrix
+# part of the expected information matrix
 re$hessian[1:8,1:8]
-# part the Hessian matrix approximated by the L-BFGS algorithm
+# part the observed information matrix approximated by the L-BFGS algorithm
 re$hessian_ap[1:8,1:8]
 ```
 The ```AtCtEt``` function returns the minus log-likelihood evaluated at the estimates that is needed to make inference based on LRT. For example, the following program tests whether the A or C component has a constant variance with respect to age, we fit the null models and calculate the p-values based on $\chi^2$ distributions. It can be seen that the LRT has no sufficient statistical power to reject the constancy of the C component with this sample size (```p1>0.05```). In addition, we test whether the C component can be ignored by comparing ```re_cc``` and ```re_cn``` and compute the p-value (```p3```) based on a mixture of $\chi^2$ distributions.  
@@ -106,7 +106,14 @@ plot_acet(re_b, heri=TRUE, boot = FALSE)
 plot_acet(re_b, heri=TRUE, boot = TRUE)
 ```
 
-The ACE(t)-p model is implemented in the ```AtCtEtp``` function, in which users can choose exponential of penalized splines, a linear function or a constant to model a certain component by setting the ```mod``` argument. Compared to the ACE(t) model, it is not an essential problem to provide an excessive number of knots (the default value of interior knots is 8) when using the ACE(t)-p model as it is more important to ensure adequate knots for curves with more fluctuation than to avoid overfitting. Below, we fit the example dataset using the ```AtCtEtp``` function in which the A and C components are modelled by B-splines of 8 interior knots and the E component by a log-linear function. Similar to the ```AtCtEt``` function, we can use the ```robust``` argument to specify the number of randomly generated initial values, which can reduce the program's possibility of being stuck on a local maximum in the EM algorithm. 
+An ADE(t) model can be fitted and plotted similarly using the ```AtDtEt``` function as shown below.
+```{r,eval=FALSE}
+## fitting an ADE(t) model with the CIs esitmated by the bootstrap method 
+re_b <- AtDtEt(data_ace$mz, data_ace$dz, mod = c('d','d','c'), boot = TRUE, num_b = 60)
+plot_acet(re_b, boot = TRUE)
+```
+
+An ACE(t)-p model is a more stable model, which reduces the sensitivity to the number of knots by using P-splines. The ACE(t)-p model is implemented in the ```AtCtEtp``` function, in which users can choose exponential of penalized splines, a linear function or a constant to model a certain component by setting the ```mod``` argument. Compared to the ACE(t) model, it is not an essential problem to provide an excessive number of knots (the default value of interior knots is 8) when using the ACE(t)-p model as it is more important to ensure adequate knots for curves with more fluctuation than to avoid overfitting. Below, we fit the example dataset using the ```AtCtEtp``` function in which the A and C components are modelled by B-splines of 8 interior knots and the E component by a log-linear function. Similar to the ```AtCtEt``` function, we can use the ```robust``` argument to specify the number of randomly generated initial values, which can reduce the program's possibility of being stuck on a local maximum in the EM algorithm. 
 ```{r}
 ## fitting an ACE(t)-p model
 re <- AtCtEtp(data_ace$mz, data_ace$dz, knot_a = 8, knot_c = 8, mod=c('d','d','l'))

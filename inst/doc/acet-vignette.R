@@ -28,9 +28,9 @@ re <- AtCtEt(data_ace$mz, data_ace$dz, mod = c('d','d','c'), knot_a = 6, knot_c 
 summary(re)
 
 ## -----------------------------------------------------------------------------
-# part of the analytical Hessian matrix
+# part of the expected information matrix
 re$hessian[1:8,1:8]
-# part the Hessian matrix approximated by the L-BFGS algorithm
+# part the observed information matrix approximated by the L-BFGS algorithm
 re$hessian_ap[1:8,1:8]
 
 ## -----------------------------------------------------------------------------
@@ -58,6 +58,11 @@ plot_acet(re_b, boot = TRUE)
 plot_acet(re_b, heri=TRUE, boot = FALSE)
 ## plot dynamic heritability with the CIs using the bootstrap method 
 plot_acet(re_b, heri=TRUE, boot = TRUE)
+
+## ----eval=FALSE---------------------------------------------------------------
+#  ## fitting an ADE(t) model with the CIs esitmated by the bootstrap method
+#  re_b <- AtDtEt(data_ace$mz, data_ace$dz, mod = c('d','d','c'), boot = TRUE, num_b = 60)
+#  plot_acet(re_b, boot = TRUE)
 
 ## -----------------------------------------------------------------------------
 ## fitting an ACE(t)-p model

@@ -19,6 +19,9 @@ extern SEXP hessian_AtCtEt_esp_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP,
 extern SEXP loglik_AtCtEt_epsp_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP loglik_AtCtEt_epsp_g_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 extern SEXP loglik_AtCtEt_esp_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP loglik_AtDtEt_esp_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP hessian_AtDtEt_esp_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
+extern SEXP gr_AtDtEt_esp_c(SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP, SEXP);
 
 static const R_CMethodDef CEntries[] = {
     {"CWrapper_mcmc_atctet",   (DL_FUNC) &CWrapper_mcmc_atctet,   32},
@@ -34,6 +37,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"loglik_AtCtEt_epsp_c",   (DL_FUNC) &loglik_AtCtEt_epsp_c,   17},
     {"loglik_AtCtEt_epsp_g_c", (DL_FUNC) &loglik_AtCtEt_epsp_g_c, 17},
     {"loglik_AtCtEt_esp_c",    (DL_FUNC) &loglik_AtCtEt_esp_c,    11},
+    {"loglik_AtDtEt_esp_c",    (DL_FUNC) &loglik_AtDtEt_esp_c,    11},
+    {"gr_AtDtEt_esp_c",        (DL_FUNC) &gr_AtDtEt_esp_c,        11},
+    {"hessian_AtDtEt_esp_c",   (DL_FUNC) &hessian_AtDtEt_esp_c,   11},
     {NULL, NULL, 0}
 };
 

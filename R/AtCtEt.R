@@ -52,11 +52,7 @@ if(mod[1]=='d')
 		knots_a <- c(knots_a, c(max_T+interval_a,max_T+interval_a*2))
 	}else{
 		knots_a <- quantile(unique(T_m,T_d), probs = seq(from=0,to=1,length.out=knot_a))
-		#interval_a <- -1*(knots_a[1] - knots_a[2])
-		#knots_a <- c(c(min_T-interval_a*2,min_T-interval_a), knots_a)
 		knots_a <- c(knots_a[1], knots_a[1], knots_a)
-		#interval_a <- knots_a[knot_a+2] - knots_a[knot_a+1]
-		#knots_a <- c(knots_a, c(max_T+interval_a,max_T+interval_a*2))
 		knots_a <- c(knots_a, knots_a[knot_a+2], knots_a[knot_a+2])
 	}
 	
@@ -89,11 +85,7 @@ if(mod[2]=='d')
 		knots_c <- c(knots_c, c(max_T+interval_c,max_T+interval_c*2))
 	}else{
 		knots_c <- quantile(unique(T_m,T_d), probs = seq(from=0,to=1,length.out=knot_c))
-		#interval_c <- -1*(knots_a[1] - knots_a[2])
-		#knots_c <- c(c(min_T-interval_c*2,min_T-interval_c), knots_c)
 		knots_c <- c(knots_c[1], knots_c[1], knots_c)
-		#interval_c <- knots_c[knot_c+2] - knots_c[knot_c+1]
-		#knots_c <- c(knots_c, c(max_T+interval_c,max_T+interval_c*2
 		knots_c <- c(knots_c, knots_c[knot_c+2], knots_c[knot_c+2])
 	}
 	
@@ -126,11 +118,7 @@ if(mod[3]=='d')
 		knots_e <- c(knots_e, c(max_T+interval_e,max_T+interval_e*2))
 	}else{
 		knots_e <- quantile(unique(T_m,T_d), probs = seq(from=0,to=1,length.out=knot_e))
-		#interval_e <- -1*(knots_a[1] - knots_a[2])
-		#knots_e <- c(c(min_T-interval_e*2,min_T-interval_e), knots_e)
 		knots_e <- c(knots_e[1], knots_e[1], knots_e)
-		#interval_e <- knots_e[knot_e+2] - knots_e[knot_e+1]
-		#knots_e <- c(knots_e, c(max_T+interval_e,max_T+interval_e*2
 		knots_e <- c(knots_e, knots_e[knot_e+2], knots_e[knot_e+2])
 	}
 	
@@ -139,7 +127,6 @@ if(mod[3]=='d')
 }else{
 knots_e <- c(min(T_m, T_d),max(T_m, T_d))
 B_des_e_m <- splineDesign(knots_e, x=T_m, ord=order)
-#knots_e <- c(min(T_d),max(T_d))
 B_des_e_d <- splineDesign(knots_e, x=T_d, ord=order)
 
 }
@@ -158,49 +145,36 @@ lo_e <- -15
 
 if(mod[1]=='n')
 {
-up_a <- lo_a <- -50
-init_a <- -50
+  up_a <- lo_a <- -50
+  init_a <- -50
 }
 
 if(mod[1]=='c')
 {
-up_a <- 20
-lo_a <- -50
-#init_a <- 1
+  up_a <- 20
+  lo_a <- -50
 }
 
 if(mod[2]=='n')
 {
-up_c <- lo_c <- -50
-init_c <- -50
+  up_c <- lo_c <- -50
+  init_c <- -50
 }
 
 if(mod[2]=='c')
 {
-up_c <- 20
-lo_c <- -50
-#init_c <- 1
+  up_c <- 20
+  lo_c <- -50
 }
 
 if(mod[3]=='c')
 {
-up_e <- 20
-lo_e <- -10
-#init_e <- 1
+  up_e <- 20
+  lo_e <- -10
 }
 
 result <- optim(c(init_a,init_c,init_e), loglik_AtCtEt_esp, gr_AtCtEt_esp, pheno_m = matrix(pheno_m), pheno_d = matrix(pheno_d), B_des_a_m = B_des_a_m, B_des_a_d = B_des_a_d, B_des_c_m = B_des_c_m, B_des_c_d = B_des_c_d, B_des_e_m = B_des_e_m, B_des_e_d = B_des_e_d,lower = c(rep(lo_a, n_a),rep(lo_c, n_c),rep(lo_e, n_e)), upper = c(rep(up_a, n_a),rep(up_c, n_c),rep(up_e, n_e)), method = "L-BFGS-B", hessian = TRUE, control=list(maxit = 3000))
-#while(result$con>0)
-#{
-#	init <- runif(n_a+n_c+n_e,min=init_min,max=init_max)
-#	if(mod[1]!='n')
-#	{init_a <- init[1:n_a]}
-#	if(mod[2]!='n')
-#	{init_c <- init[(n_a+1):(n_a+n_c)]}
-#	init_e <- init[(n_a+n_c+1):(n_a+n_c+n_e)]
-#	result <- optim(c(init_a,init_c,init_e), loglik_AtCtEt_esp, gr_AtCtEt_esp, pheno_m = matrix(pheno_m), pheno_d = matrix(pheno_d), B_des_a_m = B_des_a_m, B_des_a_d = B_des_a_d, B_des_c_m = B_des_c_m, B_des_c_d = B_des_c_d, B_des_e_m = B_des_e_m, B_des_e_d = B_des_e_d,lower = c(rep(lo_a, n_a),rep(lo_c, n_c),rep(lo_e, n_e)), upper = c(rep(up_a, n_a),rep(up_c, n_c),rep(up_e, n_e)), method = "L-BFGS-B", hessian = TRUE, control=list(maxit = 3000))
-#}
-
+  
 if(robust>0)
 {
 	for(i in 1:ceiling(robust))
@@ -247,12 +221,6 @@ if(mod[2]=='n')
 {res_c <- -Inf}
 
 AtCtEt_model <- list(n_beta_a=n_a, n_beta_c=n_c, n_beta_e=n_e, beta_a=res_a, beta_c=res_c, beta_e=res_e, hessian_ap=result$hessian, hessian=hes_m, con=result$convergence, lik=result$value, knots_a =knots_a, knots_c = knots_c, knots_e = knots_e, min_t = min_T, max_t = max_T, boot = NULL )
-
-#if(AtCtEt_model$con!=0)
-#{
-#	warning('The optimization algorithm might not converge. Try different initial values.')
-#}
-
 class(AtCtEt_model) <- 'AtCtEt_model'
 
 if(boot==TRUE)
